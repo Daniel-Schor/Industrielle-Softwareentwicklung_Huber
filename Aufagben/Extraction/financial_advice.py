@@ -29,10 +29,39 @@ def units_sold(dictionary: dict = read_csv()) -> None:
 
     print("Highest Values", top_3_values,"Lowest Values", bottom_3_values, "Average",  average_value )
 
+def usd_to_eur(usd: any) -> any:
+    # Early return for non-USD values
+    if "$" not in usd:
+        return usd
+    if "-" in usd:
+        return usd.replace("$", "€")
+    
+    # Remove bloat
+    usd = usd.replace(" ", "").replace(".", "").replace(",", ".").replace("(", "").replace(")", "")
+
+    # Convert USD to EUR
+    eur = str(round(float(usd.replace("$", ""))*1.07, 2))
+    # Add 0 if necessary
+    while True:
+        if len(eur.split(".")[1]) < 2:
+            eur += "0"
+        else:
+            break
+
+    # Add € to the string
+    if usd.startswith("$"):
+        usd = f'€{eur}'
+    else:
+        usd = f'{eur}€'
+
+    return usd
+
 def dollar(dictionary: dict = read_csv()) -> dict:
+    new_dict: dict = {}
+
     for key in dictionary:
-        dictionary[key] = [value.replace("$", "€") for value in dictionary[key]]
-    return dictionary
+        new_dict[key] = [usd_to_eur(value) for value in dictionary[key]]
+    return new_dict
 
 def print_dict(dictionary: dict = read_csv()) -> str:
     print("{")
@@ -50,9 +79,11 @@ if __name__ == "__main__":
     # 1)
     print("1)")
     print_dict(financial_sample)
+    
     # 2)
     print("\n2)")
     units_sold(financial_sample)
-
+    
+    # 3)
     print("\n3)")
-    dollar(financial_sample)
+    print(dollar(financial_sample)["Manufacturing Price"][:30:10])
