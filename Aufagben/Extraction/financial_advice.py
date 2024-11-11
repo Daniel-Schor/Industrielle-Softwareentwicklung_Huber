@@ -29,8 +29,10 @@ def units_sold(dictionary: dict = read_csv()) -> None:
 
     print("Highest Values", top_3_values,"Lowest Values", bottom_3_values, "Average",  average_value )
 
-def dollar():
-    pass
+def dollar(dictionary: dict = read_csv()) -> dict:
+    for key in dictionary:
+        dictionary[key] = [value.replace("$", "€") for value in dictionary[key]]
+    return dictionary
 
 def print_dict(dictionary: dict = read_csv()) -> str:
     print("{")
@@ -51,3 +53,6 @@ if __name__ == "__main__":
     # 2)
     print("\n2)")
     units_sold(financial_sample)
+
+    print("\n3)")
+    dollar(financial_sample)
