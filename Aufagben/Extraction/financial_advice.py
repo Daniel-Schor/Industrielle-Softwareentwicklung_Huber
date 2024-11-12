@@ -73,6 +73,38 @@ def print_dict(dictionary: dict = read_csv()) -> str:
         print(f'"{keys}": {string},')
     print("}")
 
+def month_as_number(month: str) -> int:
+    months: dict = {
+        "January": 1,
+        "February": 2,
+        "March": 3,
+        "April": 4,
+        "May": 5,
+        "June": 6,
+        "July": 7,
+        "August": 8,
+        "September": 9,
+        "October": 10,
+        "November": 11,
+        "December": 12
+    }
+
+    return months[month]
+
+def count_rows_with_year(dictionary: dict = read_csv(), year: int = 9999) -> int:
+    count: int = 0
+    for i in dictionary["Year"]:
+        if int(i) == year:
+            count += 1
+    return count
+
+def count_rows_without_discount(dictionary: dict = read_csv()) -> int:
+    count: int = 0
+    for i in dictionary["Discounts"]:
+        if "-" in i:
+            count += 1
+    return count
+
 if __name__ == "__main__":
     financial_sample = read_csv()
 
@@ -87,3 +119,13 @@ if __name__ == "__main__":
     # 3)
     print("\n3)")
     print(dollar(financial_sample)["Manufacturing Price"][:30:10])
+    
+    # 4)
+    print("\n4)")
+    print(count_rows_with_year(financial_sample, 2013))
+    print(count_rows_with_year(financial_sample, 2014))
+    print(count_rows_without_discount(financial_sample))
+
+    # 5)
+    print("\n5)")
+    print([month_as_number(i) for i in financial_sample["Month Name"]])
