@@ -4,17 +4,14 @@ import datetime as dt
 dataFrame = pd.read_csv("Aufagben/Transformation/FinancialSample.csv",
                         sep=";",
                         encoding="utf-8-sig")
-
+dataFrame.columns = dataFrame.columns.str.strip()
 # Überprüfen, ob die Spalte "Date" vorhanden ist
-
-for date in dataFrame["Date"]:
-    newDate = []
-    if "/" in date:
-        newDate.append(date.split("/"))
-        
 
 
 print(dataFrame.tail(10))
+
+
+#Aufgabe 2
 
 #print only date column
 for date in dataFrame["Date"]:
@@ -26,7 +23,12 @@ for date in dataFrame["Date"]:
     #one die library zu verwenden.
     date = date.split(".")
     date = date[1] + "." + date[0] + "." + date[2]
-    print(date)"""
+    print(date) """
 
-#read a file with panda
+#Aufgabe 3
+#Erzeugt ein neues Pandas Dataframe, welches nur die folgenden Spalten enthält und gebt die ersten 5 Einträge aus: 
+#Product, Profit, COGS, Sales
 
+
+newDataFrame = dataFrame[["Product", "Profit", "COGS", "Sales"]]
+print(newDataFrame.head(5))
