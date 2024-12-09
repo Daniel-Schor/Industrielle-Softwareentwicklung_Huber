@@ -53,3 +53,15 @@ for i in range(1, len(dataFrame["Profit"]) - 1):
     if dataFrame["Profit"][i] > dataFrame["Profit"][i - 1] and dataFrame["Profit"][i] > dataFrame["Profit"][i + 1]:
         maxima.append(i)
 print(maxima)
+
+#Aufgabe 6
+#Erzeuge ein neues Pandas Dataframe, welches nur jede X-te Zeile aus den 
+#Original-Daten beinhaltet. Wobei X = Gruppennummer gilt. Hierfür muss Pandas 
+#zum Einlesen benutzt werden.
+
+dataframe2 = pd.read_csv("Aufagben/Transformation/FinancialSample.csv",
+                            sep=";",
+                            encoding="utf-8-sig")
+dataframe2.columns = dataframe2.columns.str.strip()
+X = int(input("Gib eine beliebige Gruppennummer ein: "))
+print(dataframe2.iloc[::X, :])
