@@ -32,3 +32,24 @@ for date in dataFrame["Date"]:
 
 newDataFrame = dataFrame[["Product", "Profit", "COGS", "Sales"]]
 print(newDataFrame.head(5))
+
+
+#Aufgabe 4
+#Lest die Spalten “Month Number”, “Month Name” und “Year” in eine einzige 
+#Spalte mit einem kombinierten Datum aus allen drei Bestandteilen und löscht 
+#den Rest.
+
+dataFrame["Datum"] = dataFrame["Month Number"].astype(str) + "." + dataFrame["Month Name"] + "." + dataFrame["Year"].astype(str)
+print(dataFrame["Datum"])
+
+#Aufgabe 5
+#Findet die Positionen der zehn größten lokalen Maxima. Ein lokales Maximum ist 
+#ein Wert, der von zwei kleineren Werten umschlossen wird. Zum Beispiel [1, 3, 8, 
+#5, 10, 4] → 8 und 10 sind lokale Maxima. Das Ergebnis lautet in dem Fall also 
+#Position 2 und Position 4.
+
+maxima = []
+for i in range(1, len(dataFrame["Profit"]) - 1):
+    if dataFrame["Profit"][i] > dataFrame["Profit"][i - 1] and dataFrame["Profit"][i] > dataFrame["Profit"][i + 1]:
+        maxima.append(i)
+print(maxima)
