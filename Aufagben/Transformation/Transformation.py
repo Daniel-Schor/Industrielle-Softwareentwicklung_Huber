@@ -1,67 +1,120 @@
 import pandas as pd
 import datetime as dt
 
-dataFrame : pd.DataFrame = pd.read_csv("Aufagben/Transformation/FinancialSample.csv",
-                        sep=";",
-                        encoding="utf-8-sig")
-dataFrame.columns = dataFrame.columns.str.strip()
-# Überprüfen, ob die Spalte "Date" vorhanden ist
 
+class FinancialDataProcessor:
+    """Klasse, um Daten aus einer CSV-Datei zu verarbeiten."""
 
-print(dataFrame.tail(10))
+    def __init__(self, file_path: str):
+        """Initialisiert die Klasse mit dem Pfad zur CSV-Datei."""
+        self.file_path = file_path
+        self.data_frame = pd.read_csv(
+            self.file_path,
+            sep=";",  # Trennzeichen in der CSV-Datei
+            encoding="utf-8-sig"  # Kodierung der Datei, um Umlaute korrekt darzustellen
+        )
+        # Entfernt überflüssige Leerzeichen aus den Spaltennamen
+        self.data_frame.columns = self.data_frame.columns.str.strip()
 
+    def print_tail(self, num_rows: int = 10):
+        """Gibt die letzten Zeilen des Datenrahmens auf der Konsole aus."""
+        print(self.data_frame.tail(num_rows))
 
-#Aufgabe 2
+    def print_date_column(self):
+        """Konvertiert die Datumswerte in ein anderes Format und gibt sie aus."""
+        if "Date" in self.data_frame.columns:
+            for date in self.data_frame["Date"]:
+                # Konvertiert das Datum von "dd.mm.yyyy" in "mm.dd.yyyy"
+                formatted_date = dt.datetime.strptime(date, "%d.%m.%Y").strftime("%m.%d.%Y")
+                print(formatted_date)
+        else:
+            print("Fehler: 'Date'-Spalte wurde nicht gefunden.")
 
-#print only date column
-for date in dataFrame["Date"]:
-    date = dt.datetime.strptime(date, "%d.%m.%Y")
-    print(date.strftime("%m.%d.%Y"))
+    def create_subset(self):
+        """Erstellt und gibt einen neuen Datenrahmen mit ausgewählten Spalten aus."""
+        # Wählt die Spalten "Product", "Profit", "COGS" und "Sales" aus
+        subset = self.data_frame[["Product", "Profit", "COGS", "Sales"]]
+        print(subset.head(5))  # Gibt die ersten 5 Zeilen des neuen Datenrahmens aus
 
+    def combine_columns_to_date(self):
+        """Kombiniert die Spalten 'Month Number', 'Month Name' und 'Year' zu einer neuen Datenspalte."""
+        # Prüft, ob die erforderlichen Spalten im Datenrahmen existieren
+        if all(col in self.data_frame.columns for col in ["Month Number", "Month Name", "Year"]):
+            # Erstellt die neue Spalte 'Datum' durch Kombination der anderen Spalten
+            self.data_frame["Datum"] = (
+                self.data_frame["Month Number"].astype(str)  # Monat als Zahl
+                + "." +
+                self.data_frame["Month Name"]  # Monatsname
+                + "." +
+                self.data_frame["Year"].astype(str)  # Jahr
+            )
+            print(self.data_frame["Datum"])  # Gibt die neue Spalte auf der Konsole aus
+        else:
+            print("Fehler: Die erforderlichen Spalten für 'Datum' wurden nicht gefunden.")
 
-    """
-    #one die library zu verwenden.
-    date = date.split(".")
-    date = date[1] + "." + date[0] + "." + date[2]
-    print(date) """
+    def find_local_maxima(self, column: str = "Profit"):
+        """Findet und gibt die Positionen der lokalen Maxima in einer bestimmten Spalte aus."""
+        if column in self.data_frame.columns:
+            maxima = []
+            # Iteriert über die Werte und prüft, ob ein lokales Maximum vorliegt
+            for i in range(1, len(self.data_frame[column]) - 1):
+                if self.data_frame[column][i] > self.data_frame[column][i - 1] and self.data_frame[column][i] > self.data_frame[column][i + 1]:
+                    maxima.append(i)
+            print(maxima)
+        else:
+            print(f"Fehler: Spalte '{column}' wurde nicht gefunden.")
 
-#Aufgabe 3
-#Erzeugt ein neues Pandas Dataframe, welches nur die folgenden Spalten enthält und gebt die ersten 5 Einträge aus: 
-#Product, Profit, COGS, Sales
+    def create_grouped_subset(self, group_number: int):
+        """Erstellt und gibt einen Datenrahmen aus, der jede X-te Zeile enthält."""
+        if group_number > 0:
+            grouped_subset = self.data_frame.iloc[::group_number, :]
+            print(grouped_subset)
+        else:
+            print("Fehler: Gruppennummer muss größer als 0 sein.")
 
+    def change_discount(self, column: str = "Discounts"):
+        """Ändert den Rabattwert in der Spalte 'Discounts'."""
+        if column in self.data_frame.columns:
+            # Ausgabe der Zeilen vor der Umwandlung, als Vergleich.
+            print(self.data_frame[column][52:62])
 
-newDataFrame = dataFrame[["Product", "Profit", "COGS", "Sales"]]
-print(newDataFrame.head(5))
+            def categorize_discount(discount):
+                discount = discount.replace("$", "").replace("-", "0").replace(".", "").replace(",", ".").strip()
+                discount = float(discount)
+                if discount < 200:
+                    return "Low"
+                elif 200 < discount < 2000:
+                    return "Medium"
+                else:
+                    return "High"
+            
+            self.data_frame[column] = self.data_frame[column].apply(categorize_discount)
+            # Ausgabe der gewählten Zeilen der Spalte 'Discounts' nach der Umwandlung.
+            print(self.data_frame[column][52:62])
+            
 
+if __name__ == "__main__":
+    # Initialisiert die Verarbeitungsklasse mit dem Pfad zur CSV-Datei.
+    processor = FinancialDataProcessor("Aufagben/Transformation/FinancialSample.csv")
 
-#Aufgabe 4
-#Lest die Spalten “Month Number”, “Month Name” und “Year” in eine einzige 
-#Spalte mit einem kombinierten Datum aus allen drei Bestandteilen und löscht 
-#den Rest.
+    # Aufgabe 1: Letzte Zeilen ausgeben.
+    processor.print_tail()
 
-dataFrame["Datum"] = dataFrame["Month Number"].astype(str) + "." + dataFrame["Month Name"] + "." + dataFrame["Year"].astype(str)
-print(dataFrame["Datum"])
+    # Aufgabe 2: Datumsformat umwandeln.
+    processor.print_date_column()
 
-#Aufgabe 5
-#Findet die Positionen der zehn größten lokalen Maxima. Ein lokales Maximum ist 
-#ein Wert, der von zwei kleineren Werten umschlossen wird. Zum Beispiel [1, 3, 8, 
-#5, 10, 4] → 8 und 10 sind lokale Maxima. Das Ergebnis lautet in dem Fall also 
-#Position 2 und Position 4.
+    # Aufgabe 3: Ausschnitt mit bestimmten Spalten erstellen.
+    processor.create_subset()
 
-maxima = []
-for i in range(1, len(dataFrame["Profit"]) - 1):
-    if dataFrame["Profit"][i] > dataFrame["Profit"][i - 1] and dataFrame["Profit"][i] > dataFrame["Profit"][i + 1]:
-        maxima.append(i)
-print(maxima)
+    # Aufgabe 4: Spalten zu einer neuen Datenspalte kombinieren.
+    processor.combine_columns_to_date()
 
-#Aufgabe 6
-#Erzeuge ein neues Pandas Dataframe, welches nur jede X-te Zeile aus den 
-#Original-Daten beinhaltet. Wobei X = Gruppennummer gilt. Hierfür muss Pandas 
-#zum Einlesen benutzt werden.
+    # Aufgabe 5: Lokale Maxima in der Spalte "Profit" finden.
+    processor.find_local_maxima()
 
-dataframe2 = pd.read_csv("Aufagben/Transformation/FinancialSample.csv",
-                            sep=";",
-                            encoding="utf-8-sig")
-dataframe2.columns = dataframe2.columns.str.strip()
-X = int(input("Gib eine beliebige Gruppennummer ein: "))
-print(dataframe2.iloc[::X, :])
+    # Aufgabe 6: Gruppierten Ausschnitt erstellen.
+    group_number = int(input("Gib eine beliebige Gruppennummer ein: "))
+    processor.create_grouped_subset(group_number)
+
+    #Aufgabe 7: Rabattwerte ändern.
+    processor.change_discount()
