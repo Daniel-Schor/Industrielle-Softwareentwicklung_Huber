@@ -1,7 +1,7 @@
 import pandas as pd
 import datetime as dt
 
-dataFrame = pd.read_csv("Aufagben/Transformation/FinancialSample.csv",
+dataFrame : pd.DataFrame = pd.read_csv("Aufagben/Transformation/FinancialSample.csv",
                         sep=";",
                         encoding="utf-8-sig")
 dataFrame.columns = dataFrame.columns.str.strip()
