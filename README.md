@@ -9,3 +9,6 @@ pip install -r requirements.txt
 
 - frontend (streamlit) starten mit:
 streamlit run src\frontend\frontend.py
+
+- run ETL
+python src\database\ETL\ETL.py
