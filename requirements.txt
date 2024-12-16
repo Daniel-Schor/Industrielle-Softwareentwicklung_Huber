@@ -1,4 +1,4 @@
 streamlit==1.40.1
 pandas==2.2.3
 fastapi==0.115.5
-fastapi-cli==0.0.5
+fastapi-cli==0.0.7
