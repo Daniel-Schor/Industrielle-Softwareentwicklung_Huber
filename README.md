@@ -1,14 +1,46 @@
-- Virtuale Umgebung nur einmalig erzeugen im ..\project Ordner mit:
-python -m venv env
+# Cost of living and income Analysis Dashboard
+---
 
-- env Verzeichnis aktivieren mit:
-env\Scripts\activate
+## Beschreibung
+Dies ist ein Projekt für ein Dashboard zur analyse der CostOfLivingAndIncome Datenbasis.
 
-- requirements installieren mit:
-pip install -r requirements.txt
+--- 
+## Installation und Start
+### Porjekt installation:
+> **Virtuale Umgebung erzeugen**
+``` python -m venv env ```
 
-- frontend (streamlit) starten mit:
-streamlit run src\frontend\frontend.py
+> **env Verzeichnis aktivieren**
+``` env\Scripts\activate ```
 
-- run ETL
-python src\database\ETL\ETL.py
+> **Requirements installieren**
+``` pip install -r requirements.txt ```
+
+### Datenbank aufbauen:
+> **env Verzeichnis aktivieren**
+``` env\Scripts\activate ```
+
+> **ETL ausführen**
+``` python src\database\ETL\ETL.py ```
+
+### Porjekt starten:
+> **env Verzeichnis aktivieren**
+``` env\Scripts\activate ```
+
+> **frontend (streamlit) starten**
+``` streamlit run src\frontend\frontend.py ```
+
+---
+
+## Credits
+
+> **MODUL:** 
+Industrielle Softwareentwickling
+> **PRÜFER:** 
+Gabriel Huber
+> **SEMESTER:**
+WiSe 2024/25
+> **TEILNEHMER:**
+Esrom Johannes, Davide Pedergnana, Daniel Schor
+
+---
