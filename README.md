@@ -7,38 +7,40 @@ Dies ist ein Projekt für ein Dashboard zur analyse der CostOfLivingAndIncome Da
 --- 
 ## Installation und Start
 ### Porjekt installation:
-**Virtuale Umgebung erzeugen**
+> **Virtuale Umgebung erzeugen**
 ``` python -m venv env ```
 
-**env Verzeichnis aktivieren**
+> **env Verzeichnis aktivieren**
 ``` env\Scripts\activate ```
 
-**Requirements installieren**
+> **Requirements installieren**
 ``` pip install -r requirements.txt ```
 
 ### Datenbank aufbauen:
-**env Verzeichnis aktivieren**
+> **env Verzeichnis aktivieren**
 ``` env\Scripts\activate ```
 
-**ETL ausführen**
+> **ETL ausführen**
 ``` python src\database\ETL\ETL.py ```
 
 ### Porjekt starten:
-**env Verzeichnis aktivieren**
+> **env Verzeichnis aktivieren**
 ``` env\Scripts\activate ```
 
-**frontend (streamlit) starten**
+> **frontend (streamlit) starten**
 ``` streamlit run src\frontend\frontend.py ```
 
 ---
 
 ## Credits
 
-**MODUL:** 
+> **MODUL:** 
 Industrielle Softwareentwickling
-**PRÜFER:** 
+> **PRÜFER:** 
 Gabriel Huber
-**SEMESTER:**
+> **SEMESTER:**
 WiSe 2024/25
-**TEILNEHMER:**
+> **TEILNEHMER:**
 Esrom Johannes, Davide Pedergnana, Daniel Schor
+
+---
