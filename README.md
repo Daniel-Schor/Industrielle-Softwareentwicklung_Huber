@@ -6,7 +6,7 @@ Dies ist ein Projekt für ein Dashboard zur analyse der CostOfLivingAndIncome Da
 
 --- 
 ## Installation und Start
-### Porjekt installation:
+### Projekt installation:
 > **Virtuale Umgebung erzeugen**
 ``` python -m venv env ```
 
