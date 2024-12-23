@@ -95,7 +95,7 @@ class FinancialDataProcessor:
 
 if __name__ == "__main__":
     # Initialisiert die Verarbeitungsklasse mit dem Pfad zur CSV-Datei.
-    processor = FinancialDataProcessor("Aufagben/Transformation/FinancialSample.csv")
+    processor = FinancialDataProcessor(r"Industrielle-Softwareentwicklung_Huber\Unterricht\Aufagben\Transformation\FinancialSample.csv")
 
     # Aufgabe 1: Letzte Zeilen ausgeben.
     processor.print_tail()
