@@ -21,7 +21,7 @@ class Datei_Einlesen:
         if "Year" not in self.data_frame.columns:
             self.data_frame = self.data_frame.applymap(lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
         
-        # Spalten mit den Wörter "Tax" oder "Percentage" werden als Prozent formatiert, die mit Cost oder Income mit $.
+        # Spalten mit den Wörtern "Tax" oder "Percentage" werden als Prozent formatiert, die mit Cost oder Income mit $.
         # Bei manchen Spalten sind sowohl das Wort "Tax" als "Cost" enthalten, da kommt dann die erste Bedingung.
         for column in self.data_frame.columns:
             if any(keyword in column for keyword in ["Tax", "Percentage"]):
@@ -54,4 +54,4 @@ if __name__ == "__main__":
     processor.save_to_db('Database1.db', 'CostOfLivingAndIncome')
     
     # Zeigt die Daten in der SQLite-Datenbank an.
-    processor.show_db('Database1.db', 'CostOfLivingAndIncome')
+    """processor.show_db('Database1.db', 'CostOfLivingAndIncome')"""
