@@ -17,10 +17,14 @@ class Datei_Einlesen:
         # Entfernt überflüssige Leerzeichen aus den Spaltennamen
         self.data_frame.columns = self.data_frame.columns.str.strip()
 
-        # Zwei dezimalstellen für numerische Werte (außer "Year" spalte)
-        if "Year" not in self.data_frame.columns:
-            self.data_frame = self.data_frame.applymap(lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
-        
+        # Zwei dezimalstellen für numerische Werte (außer "Year", "Country" und "Region" Spalten)
+        required_columns = ["Year", "Country", "Region"]
+        for column in self.data_frame.columns:
+            if column not in required_columns:
+                self.data_frame[column] = pd.to_numeric(self.data_frame[column], errors='coerce')
+                self.data_frame[column] = self.data_frame[column].map(lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
+
+                       
         # Spalten mit den Wörtern "Tax" oder "Percentage" werden als Prozent formatiert, die mit Cost oder Income mit $.
         # Bei manchen Spalten sind sowohl das Wort "Tax" als "Cost" enthalten, da kommt dann die erste Bedingung.
         for column in self.data_frame.columns:
