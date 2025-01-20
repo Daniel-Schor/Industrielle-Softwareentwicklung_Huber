@@ -1,2 +1,2 @@
-name="main.py"
-version=3.12
+name = "main.py"
+version = 3.13
