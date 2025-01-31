@@ -55,6 +55,14 @@ class Datei_Einlesen:
         connection.close()
         print(tabulate(df, headers='keys', tablefmt='psql'))
 
+    def get_data_from_db():
+        conn = sqlite3.connect('Database1.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM your_table")
+        data = cursor.fetchall()
+        conn.close()
+        return data
+
 
 if __name__ == "__main__":
     # Initialisiert die Verarbeitungsklasse mit dem Pfad zur CSV-Datei.
