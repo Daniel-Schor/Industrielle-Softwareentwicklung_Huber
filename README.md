@@ -41,6 +41,6 @@ Gabriel Huber
 > **SEMESTER:**
 WiSe 2024/25
 > **TEILNEHMER:**
-Esrom Johannes, Davide Pedergnana, Daniel Schor
+Esrom Johannes, Davide Pedergnana, Daniel Schor, Mavin-Moris Scholl
 
 ---
