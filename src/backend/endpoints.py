@@ -274,7 +274,8 @@ def get_xxx_query() -> select:
     query = select(
         CostOfLivingAndIncome.Country,
         CostOfLivingAndIncome.Year,
-        CostOfLivingAndIncome.Net_Income - CostOfLivingAndIncome.Sum_Costs
+        (CostOfLivingAndIncome.Net_Income -
+         CostOfLivingAndIncome.Sum_Costs).label("Remaining_Income")
     )
 
     return query
@@ -308,7 +309,7 @@ async def xxx(
         {
             "Country": row[0],
             "Year": row[1],
-            "Value": row[3]
+            "Value": row[2]
         }
         for row in data
     ]
