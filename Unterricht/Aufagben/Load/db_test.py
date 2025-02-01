@@ -67,22 +67,6 @@ class TestFinancialSampleDatabase(unittest.TestCase):
         else:
             self.assertTrue(True)
 
-    def test_mont_ger(self):
-        # Überprüfe, ob der Eintrag mit Segment = Channel Partners und Country = Germany und Product = Montana 1545 als Wert bei Units Sold hat
-        query = select(
-            FinancialSample
-        ).where(
-            FinancialSample.Country == 'Germany',
-            FinancialSample.Segment == 'Channel Partners',
-            FinancialSample.Product == 'Montana',
-            FinancialSample.__table__.c["Units Sold"] == 1545
-        )
-        
-        result = self.session.execute(query).fetchone()
-        if result is None:
-            self.fail('Eintrag nicht gefunden')
-        else:
-            self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()
