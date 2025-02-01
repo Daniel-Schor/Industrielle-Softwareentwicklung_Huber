@@ -121,6 +121,44 @@ fig_country.update_layout(
     template="plotly_dark"
 )
 
+
+# Fetch country data
+country = "Germany"  # Beispiel: Hier könnte das Land dynamisch eingegeben werden
+country_data = fetch_country_data(country)
+
+# Convert country data to DataFrame
+df_country = convert_to_dataframe(country_data)
+
+# Filter the data for the last available year for the selected country
+latest_year = df_country["Year"].max()
+latest_year_data = df_country[df_country["Year"] == latest_year]
+
+# Select the desired columns for the pie chart
+pie_columns = [
+    "Average_Monthly_Income",
+    "Net_Income",
+    "Cost_of_Living",
+    "Housing_Cost",
+    "Tax_Rate",
+    "Savings",
+    "Healthcare_Cost",
+    "Education_Cost",
+    "Transportation_Cost"
+]
+
+# Prepare the data for the pie chart (using the latest year)
+pie_data = latest_year_data[pie_columns].iloc[0].to_dict()
+
+# Create a Plotly pie chart
+fig_pie = go.Figure(data=[go.Pie(labels=list(pie_data.keys()), values=list(pie_data.values()), hole=0.3)])
+
+# Update pie chart layout
+fig_pie.update_layout(
+    title=f"Distribution for {latest_year}",
+    template="plotly_dark"
+)
+
+
 # Layout with two columns
 col1, col2 = st.columns([1, 1])
 
@@ -131,5 +169,6 @@ with col1:
     # Display the country plot
     st.plotly_chart(fig_country)
 
-with col2:    
+with col2: 
+    st.plotly_chart(fig_pie)   
     st.title("Hello World page 1")
