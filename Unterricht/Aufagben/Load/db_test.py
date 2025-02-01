@@ -1,72 +1,62 @@
 import unittest
 import sqlite3
-import random
-from sqlalchemy import create_engine, Column, String, Integer, Float, select
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
-Base = declarative_base()
+class TestNumberRows(unittest.TestCase):
 
-class FinancialSample(Base):
-    __tablename__ = 'FinancialSample'
-    Country = Column(String, primary_key=True)
-    Segment = Column(String)
-    Product = Column(String)
-    Units_Sold = Column(Integer, name="Units Sold")
-    Discount_Band = Column(String, name="Discount Band")
-    Manufacturing_Price = Column(Float, name="Manufacturing Price")
-    Sale_Price = Column(Float, name="Sale Price")
-    Gross_Sales = Column(Float, name="Gross Sales")
-    Discounts = Column(Float)
-    Sales = Column(Float)
-    COGS = Column(Float)
-    Profit = Column(Float)
-    Date = Column(String)
-    MonthYear = Column(String)
-
-class TestFinancialSampleDatabase(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         # Verbindung zur Datenbank herstellen
-        self.connection = sqlite3.connect(r'Unterricht\Aufagben\Load\FinancialSample.db')
-        self.cursor = self.connection.cursor()
-        self.engine = create_engine('sqlite:///Unterricht/Aufagben/Load/FinancialSample.db')
-        self.Session = sessionmaker(bind=self.engine)
-        self.session = self.Session()
+        cls.conn = sqlite3.connect(r"Unterricht\Aufagben\Load\FinancialSample.db")
+        cls.cursor = cls.conn.cursor()
 
-    def tearDown(self):
-        # Verbindung zur Datenbank schließen
-        self.connection.close()
-        self.session.close()
+    @classmethod
+    def tearDownClass(cls):
+        # Verbindung schließen
+        cls.conn.close()
 
-    def test_sample_data(self):
-        # Liste der Länder
-        countries = ['United States', 'Mexico', 'France', 'Germany', 'Canada']
-        
-        # Zufälliges Land auswählen
-        random_country = random.choice(countries)
-        
-        # Abfrage mit dem zufälligen Land ausführen
-        self.cursor.execute("SELECT * FROM FinancialSample WHERE Country = ?", (random_country,))
-        rows = self.cursor.fetchall()
-        print(len(rows))
-        # Überprüfen, ob die Anzahl der Zeilen korrekt ist
-        
-        if len(rows) != 140:
-            self.fail(f'Die Daten für {random_country} sind nicht korrekt')
-        else:
-            self.assertTrue(True)
-        
     def test_number_of_rows(self):
-        # Anzahl der Zeilen in der Tabelle FinancialSample
+        """Test, ob die Anzahl der Zeilen in FinancialSample genau 700 ist."""
         self.cursor.execute("SELECT COUNT(*) FROM FinancialSample")
         count = self.cursor.fetchone()[0]
+        self.assertEqual(count, 700, f"Erwartete 700 Zeilen, aber {count} gefunden.")
+
+    def test_number_of_rows_falsch(self):
+        """Test, ob die Anzahl der Zeilen NICHT ungleich 700 ist (redundant, aber korrekt)."""
+        self.cursor.execute("SELECT COUNT(*) FROM FinancialSample")
+        count = self.cursor.fetchone()[0]
+        self.assertFalse(count != 700, f"Erwartete 700 Zeilen, aber {count} gefunden.")
+
+
+class HIGH_VALUE(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # Verbindung zur Datenbank herstellen
+        cls.conn = sqlite3.connect(r"Unterricht\Aufagben\Load\FinancialSample.db") 
+        cls.cursor = cls.conn.cursor()
+
+    @classmethod
+    def tearDownClass(cls):
+        # Verbindung schließen
+        cls.conn.close()
+    
+    def test_max_sales(self):
+        """Test, ob der größte Wert in der Spalte 'Sales' 1159200 ist."""
+        self.cursor.execute("SELECT Sales FROM FinancialSample")
+        sales_data = self.cursor.fetchall()
+        cleaned_sales = [float(sales[0].strip().replace('$', '').replace('.', '').replace(',', '.')) for sales in sales_data]
         
-        # Überprüfen, ob die Anzahl der Zeilen korrekt ist
-        if count != 700:
-            self.fail('Die Anzahl der Zeilen in der Tabelle FinancialSample ist nicht korrekt')
-        else:
-            self.assertTrue(True)
+        max_sales = max(cleaned_sales)
+        self.assertEqual(max_sales, 1159200, f"Erwartete 1159200, aber {max_sales} gefunden.")
+       
+    def test_max_sales_false(self):
+        """Test, ob der größte Wert in der Spalte 'Sales' NICHT ungleich 1159200 ist (redundant, aber korrekt)."""
+        self.cursor.execute("SELECT Sales FROM FinancialSample")
+        sales_data = self.cursor.fetchall()
+        cleaned_sales = [float(sales[0].strip().replace('$', '').replace('.', '').replace(',', '.')) for sales in sales_data]
+        
+        max_sales = max(cleaned_sales)
+        self.assertFalse(max_sales != 1159200, f"Erwartete 1159200, aber {max_sales} gefunden.")
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
