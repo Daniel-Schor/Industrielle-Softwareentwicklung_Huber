@@ -2,6 +2,7 @@ import os
 import sqlite3
 import pandas as pd
 from tabulate import tabulate
+import yaml
 
 
 class Datei_Einlesen:
@@ -19,7 +20,7 @@ class Datei_Einlesen:
         """
             Initialisiert die Klasse mit dem Pfad zur CSV-Datei.
 
-        :param _csv_path: Pfad zur CSV-Datei, welche die Datenbasis enthält 
+        :param _csv_path: Pfad zur CSV-Datei, welche die Datenbasis enthält
         """
         self._csv_path = os.path.abspath(_csv_path)
         self.extract()
@@ -75,7 +76,7 @@ class Datei_Einlesen:
 
     def calc_real_values(self) -> None:
         """
-            Berechnet die dollar-Werte für alle Spalten im DataFrame die mit "_Percentage" enden 
+            Berechnet die dollar-Werte für alle Spalten im DataFrame die mit "_Percentage" enden
             und fügt diese als Spalte ohne diesen suffix rechts daneben ein.
         """
 
@@ -181,12 +182,18 @@ class Datei_Einlesen:
 
 if __name__ == "__main__":
     # Initialisiert die Verarbeitungsklasse mit dem Pfad zur CSV-Datei.
+    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    CONFIG_FILE = os.path.join(ROOT, "ETL/ETL_Config.yaml")
+
+    with open(CONFIG_FILE, "r") as file:
+        CONFIG: dict = dict(yaml.safe_load(file))
 
     processor = Datei_Einlesen(
-        "src/database/ETL/data/CostOfLivingAndIncome.csv")
+        os.path.join(ROOT, CONFIG["CSV_PATH"]))
 
     # Speichert die Daten in der SQLite-Datenbank.
-    processor.save_to_db('Database1.db', 'CostOfLivingAndIncome')
+    processor.save_to_db(os.path.join(
+        ROOT, CONFIG["DB_NAME"]), CONFIG["TABLE_NAME"])
 
     # Zeigt die Daten in der SQLite-Datenbank an.
     # processor.show_db('Database1.db', 'CostOfLivingAndIncome')
