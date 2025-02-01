@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, Float
+from sqlalchemy import create_engine, Column, Integer, String, Float, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
@@ -141,27 +141,27 @@ async def get_country_data(
 @router.get("/all-information-for-region")
 async def get_all_data(session: AsyncSession = Depends(get_db)):
     query = select(
-    CostOfLivingAndIncome.Region,
-    CostOfLivingAndIncome.Year,
-    CostOfLivingAndIncome.Average_Monthly_Income,
-    CostOfLivingAndIncome.Net_Income,
-    CostOfLivingAndIncome.Cost_of_Living,
-    CostOfLivingAndIncome.Housing_Cost_Percentage,
-    CostOfLivingAndIncome.Housing_Cost,
-    CostOfLivingAndIncome.Tax_Rate,
-    CostOfLivingAndIncome.Savings_Percentage,
-    CostOfLivingAndIncome.Savings,
-    CostOfLivingAndIncome.Healthcare_Cost_Percentage,
-    CostOfLivingAndIncome.Healthcare_Cost,
-    CostOfLivingAndIncome.Education_Cost_Percentage,
-    CostOfLivingAndIncome.Education_Cost,
-    CostOfLivingAndIncome.Transportation_Cost_Percentage,
-    CostOfLivingAndIncome.Transportation_Cost,
-    CostOfLivingAndIncome.Sum_Percentage,
-    CostOfLivingAndIncome.Sum,
-    CostOfLivingAndIncome.Sum_Costs,
-)
-    
+        CostOfLivingAndIncome.Region,
+        CostOfLivingAndIncome.Year,
+        func.avg(CostOfLivingAndIncome.Average_Monthly_Income).label("Average_Monthly_Income"),
+        func.avg(CostOfLivingAndIncome.Net_Income).label("Net_Income"),
+        func.avg(CostOfLivingAndIncome.Cost_of_Living).label("Cost_of_Living"),
+        func.avg(CostOfLivingAndIncome.Housing_Cost_Percentage).label("Housing_Cost_Percentage"),
+        func.avg(CostOfLivingAndIncome.Housing_Cost).label("Housing_Cost"),
+        func.avg(CostOfLivingAndIncome.Tax_Rate).label("Tax_Rate"),
+        func.avg(CostOfLivingAndIncome.Savings_Percentage).label("Savings_Percentage"),
+        func.avg(CostOfLivingAndIncome.Savings).label("Savings"),
+        func.avg(CostOfLivingAndIncome.Healthcare_Cost_Percentage).label("Healthcare_Cost_Percentage"),
+        func.avg(CostOfLivingAndIncome.Healthcare_Cost).label("Healthcare_Cost"),
+        func.avg(CostOfLivingAndIncome.Education_Cost_Percentage).label("Education_Cost_Percentage"),
+        func.avg(CostOfLivingAndIncome.Education_Cost).label("Education_Cost"),
+        func.avg(CostOfLivingAndIncome.Transportation_Cost_Percentage).label("Transportation_Cost_Percentage"),
+        func.avg(CostOfLivingAndIncome.Transportation_Cost).label("Transportation_Cost"),
+        func.avg(CostOfLivingAndIncome.Sum_Percentage).label("Sum_Percentage"),
+        func.avg(CostOfLivingAndIncome.Sum).label("Sum"),
+        func.avg(CostOfLivingAndIncome.Sum_Costs).label("Sum_Costs")
+    ).group_by(CostOfLivingAndIncome.Region, CostOfLivingAndIncome.Year)
+
     result = await session.execute(query)
     data = result.fetchall()
 
