@@ -5,7 +5,7 @@ from tabulate import tabulate
 import yaml
 
 
-class Datei_Einlesen:
+class ETL_Handler:
     """
         Klasse zum Einlesen einer CSV-Datei und Speichern der Daten in einer SQLite-Datenbank. ETL erfolgt hier drin.
 
@@ -194,11 +194,12 @@ class Datei_Einlesen:
                 table_name, connection, if_exists='replace', index=False)
             connection.commit()
 
-# other---------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------
 
-    # XXX unnötig
+
+class DB_Handler:
+
     def show_db(
-            self,
             db_name: str,
             table_name: str
     ) -> None:
@@ -209,31 +210,11 @@ class Datei_Einlesen:
         :param table_name: Name der Tabelle in der SQLite-Datenbank
         """
 
-        connection = sqlite3.connect(db_name)
-        query = f"SELECT * FROM {table_name}"
-        _df = pd.read_sql_query(query, connection)
-        connection.close()
+        with sqlite3.connect(db_name) as connection:
+            query = f"SELECT * FROM {table_name} LIMIT 5"
+            _df = pd.read_sql_query(query, connection)
+
         print(tabulate(_df, headers='keys', tablefmt='psql'))
-
-    def get_data_from_db(
-            db_name: str,
-            table_name: str
-    ) -> list:
-        """
-            Liest die Daten aus der SQLite-Datenbank und gibt sie als Liste aus.
-
-        :param db_name: Name der SQLite-Datenbank
-        :param table_name: Name der Tabelle in der SQLite-Datenbank
-        :return: Liste mit den Daten
-        """
-
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
-        query = f"SELECT * FROM {table_name}"
-        cursor.execute(query)
-        data = cursor.fetchall()
-        conn.close()
-        return data
 
 # Main ---------------------------------------------------------------------------------------------------------
 
@@ -246,11 +227,14 @@ if __name__ == "__main__":
     with open(CONFIG_FILE, "r") as file:
         CONFIG: dict = dict(yaml.safe_load(file))
 
-    processor = Datei_Einlesen(
+    processor = ETL_Handler(
         os.path.join(ROOT, CONFIG["CSV_PATH"]))
 
     # Speichert die Daten in der SQLite-Datenbank.
     processor.save_to_db(os.path.join(
+        ROOT, CONFIG["DB_NAME"]), CONFIG["TABLE_NAME"])
+
+    DB_Handler.show_db(os.path.join(
         ROOT, CONFIG["DB_NAME"]), CONFIG["TABLE_NAME"])
 
     # Zeigt die Daten in der SQLite-Datenbank an.
