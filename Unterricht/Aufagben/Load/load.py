@@ -282,7 +282,10 @@ def dec(
 
 
 def generate_id():
-    """Generates a unique identifier."""
+    """
+        Generiert eine ID
+    """
+
     return str(uuid.uuid4())
 
 
@@ -354,12 +357,6 @@ if __name__ == "__main__":
     processor.safe_to_csv()
 
     # ---------------
-
-    # [x] 3.1a)
-    # [x] 3.1b)
-    # [x] 3.1c)
-    # [x] 3.2a)
-    # [x] 3.2b)
 
     # Lesen des modifizierten CSV-Datei
     df = pd.read_csv(MODIFIED_FILE, sep=";", encoding="utf-8-sig")
