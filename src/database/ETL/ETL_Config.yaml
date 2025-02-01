@@ -1,0 +1,4 @@
+CSV_PATH: 'data/CostOfLivingAndIncome.csv'
+DB_NAME: 'CostOfLivingAndIncome.db'
+TABLE_NAME: 'CostOfLivingAndIncome'
+
