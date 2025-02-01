@@ -2,8 +2,6 @@ import os
 import sqlite3
 import pandas as pd
 from tabulate import tabulate
-# SQLite3 Editor Extension installieren.
-
 
 class Datei_Einlesen:
     """Klasse zum Einlesen einer CSV-Datei und Speichern der Daten in einer SQLite-Datenbank. ETL erfolgt hier drin."""
@@ -19,7 +17,7 @@ class Datei_Einlesen:
         # Entfernt überflüssige Leerzeichen aus den Spaltennamen
         self.data_frame.columns = self.data_frame.columns.str.strip()
 
-        # Zwei dezimalstellen für numerische Werte (außer "Year", "Country" und "Region" Spalten)
+        # Zwei Dezimalstellen für numerische Werte (außer "Year", "Country" und "Region" Spalten)
         required_columns = ["Year", "Country", "Region"]
         for column in self.data_frame.columns:
             if column not in required_columns:
@@ -27,6 +25,9 @@ class Datei_Einlesen:
                     self.data_frame[column], errors='coerce')
                 self.data_frame[column] = self.data_frame[column].map(
                     lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
+
+        # Methode um eine neue Spalte zu erzeugen, was die Summe von allen Spalten mit "Percentage" im Namen ist.
+        self.add_sum_percentage_column()
 
         # Spalten mit den Wörtern "Tax" oder "Percentage" werden als Prozent formatiert, die mit Cost oder Income mit $.
         # Bei manchen Spalten sind sowohl das Wort "Tax" als "Cost" enthalten, da kommt dann die erste Bedingung.
@@ -37,6 +38,13 @@ class Datei_Einlesen:
             elif any(keyword in column for keyword in ["Cost", "Income"]):
                 self.data_frame[column] = self.data_frame[column].map(
                     lambda x: f"${str(x)}" if isinstance(x, (int, float, str)) else x)
+                
+ # Methode um eine neue Spalte zu erzeugen, was die Summe von allen Spalten mit "Percentage" im Namen ist.
+    def add_sum_percentage_column(self):
+        """Erzeugt eine neue Spalte, die die Summe aller 'Percentage'-Spalten enthält."""
+        percentage_columns = [column for column in self.data_frame.columns if "Percentage" in column]
+        self.data_frame["Sum_Percentage"] = self.data_frame[percentage_columns].map(lambda x: float(str(x).replace('%', '')) if isinstance(x, str) else x).sum(axis=1)
+        self.data_frame["Sum_Percentage"] = self.data_frame["Sum_Percentage"].map(lambda x: f"{x:.2f}")
 
     # Methode um die Daten in einer SQLite-Datenbank zu speichern
     def save_to_db(self, db_name: str, table_name: str):
@@ -55,14 +63,14 @@ class Datei_Einlesen:
         connection.close()
         print(tabulate(df, headers='keys', tablefmt='psql'))
 
-    def get_data_from_db():
-        conn = sqlite3.connect('Database1.db')
+    def get_data_from_db(db_name: str, table_name: str):
+        conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM your_table")
+        query = f"SELECT * FROM {table_name}"
+        cursor.execute(query)
         data = cursor.fetchall()
         conn.close()
         return data
-
 
 if __name__ == "__main__":
     # Initialisiert die Verarbeitungsklasse mit dem Pfad zur CSV-Datei.
@@ -72,4 +80,5 @@ if __name__ == "__main__":
     processor.save_to_db('Database1.db', 'CostOfLivingAndIncome')
 
     # Zeigt die Daten in der SQLite-Datenbank an.
-    """processor.show_db('Database1.db', 'CostOfLivingAndIncome')"""
+    # processor.show_db('Database1.db', 'CostOfLivingAndIncome')
+   
