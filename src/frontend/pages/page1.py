@@ -23,8 +23,6 @@ def fetch_country(storeid):
         st.error("Error fetching store details")
         return None    
 
-st.title("Hello World page 1")
-
 # Convert the data to a DataFrame for easier handling
 def convert_to_dataframe(data):
     # List to hold the region, year, and average monthly income
@@ -102,5 +100,13 @@ fig.update_layout(
     template="plotly_dark"
 )
 
-# Display the plot
-st.plotly_chart(fig)
+
+
+col1, col2 = st.columns([1, 1])
+    
+with col1:
+    # Display the plot
+    st.plotly_chart(fig)
+    
+with col2:    
+    st.title("Hello World page 1")
