@@ -129,7 +129,7 @@ class ETL_Handler:
         """
 
         self._df["Net_Income"] = self._df["Average_Monthly_Income"] * \
-            0.01 * self._df["Tax_Rate"]
+            0.01 * (100 - self._df["Tax_Rate"])
         self.move_to_neighbour("Average_Monthly_Income", "Net_Income")
 
     def calc_real_values(self) -> None:
@@ -234,8 +234,8 @@ if __name__ == "__main__":
     processor.save_to_db(os.path.join(
         ROOT, CONFIG["DB_NAME"]), CONFIG["TABLE_NAME"])
 
-    DB_Handler.show_db(os.path.join(
-        ROOT, CONFIG["DB_NAME"]), CONFIG["TABLE_NAME"])
+    # DB_Handler.show_db(os.path.join(
+    #    ROOT, CONFIG["DB_NAME"]), CONFIG["TABLE_NAME"])
 
     # Zeigt die Daten in der SQLite-Datenbank an.
     # processor.show_db('Database1.db', 'CostOfLivingAndIncome')
