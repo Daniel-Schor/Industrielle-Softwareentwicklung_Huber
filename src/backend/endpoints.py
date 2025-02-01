@@ -1,14 +1,11 @@
+import os
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import create_engine, Column, Integer, String, Float, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from databases import Database
 from typing import List
-import asyncio
-import os
 
 # Absolute path to the database file
 DATABASE_PATH = os.path.join(
@@ -28,6 +25,11 @@ Base = declarative_base()
 
 
 class CostOfLivingAndIncome(Base):
+    """
+        Definition der Tabelle CostOfLivingAndIncome
+
+    """
+
     __tablename__ = "CostOfLivingAndIncome"
 
     # Country als Primärschlüssel
@@ -60,14 +62,24 @@ router = APIRouter()
 
 
 async def get_db():
+    """
+        Dependency um die Datenbankverbindung zu erhalten
+
+    :yield: die Datenbankverbindung
+    """
+
     async with SessionLocal() as session:
         yield session
-
-# Endpoint to get Average_Monthly_Income for all Countries
 
 
 @router.get("/average-income")
 async def get_average_monthly_income(session: AsyncSession = Depends(get_db)):
+    """
+        Endpoint to get Average_Monthly_Income for all Countries
+
+    :returns: Das ergebnis der Abfrage
+    """
+
     query = select(CostOfLivingAndIncome.Country,
                    CostOfLivingAndIncome.Average_Monthly_Income)
     result = await session.execute(query)
@@ -90,6 +102,12 @@ async def get_country_data(
     country: str,
     session: AsyncSession = Depends(get_db)
 ):
+    """
+        Endpoint um alle Daten für ein bestimmtes Land abzufragen
+
+    :param country: Das Land für das die Daten abgefragt werden sollen
+    :returns: Das ergebnis der Abfrage
+    """
     query = select(
         CostOfLivingAndIncome.Country,
         CostOfLivingAndIncome.Year,
@@ -148,7 +166,13 @@ async def get_country_data(
 
 
 @router.get("/all-information-for-region")
-async def get_all_data(session: AsyncSession = Depends(get_db)):
+async def get_all_data_for_region(session: AsyncSession = Depends(get_db)) -> List[dict]:
+    """
+        Endpoint um alle Daten gruppiert nach Regionen abzufragen
+
+    :returns: Das ergebnis der Abfrage
+    """
+
     query = select(
         CostOfLivingAndIncome.Region,
         CostOfLivingAndIncome.Year,
@@ -211,9 +235,13 @@ async def get_all_data(session: AsyncSession = Depends(get_db)):
     ]
 
 
-# Endpoint to get all columns for all rows
 @router.get("/all-information")
-async def get_all_data(session: AsyncSession = Depends(get_db)):
+async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
+    """
+        Endpoint um alle Daten abzufragen
+
+    :returns: Das ergebnis der Abfrage
+    """
     query = select(
         CostOfLivingAndIncome.Country,
         CostOfLivingAndIncome.Year,
@@ -273,6 +301,11 @@ async def get_all_data(session: AsyncSession = Depends(get_db)):
 
 
 def get_disposable_income_query() -> select:
+    """
+        Query für die Berechnung des verfügbaren Einkommens
+
+    :return: sqlalchemy Query
+    """
     query = select(
         CostOfLivingAndIncome.Country,
         CostOfLivingAndIncome.Year,
@@ -282,8 +315,15 @@ def get_disposable_income_query() -> select:
 
     return query
 
+# TODO Add more queries here
+
 
 def get_x_query() -> select:
+    """
+        Query für XXX
+
+    :return: XXX
+    """
     query = select(
         CostOfLivingAndIncome.Country,
         CostOfLivingAndIncome.Year,
@@ -345,12 +385,24 @@ def get_x_query() -> select:
 async def financial_development(
     method: str,
     session: AsyncSession = Depends(get_db)
-):
+) -> List[dict]:
+    """
+        Endoint um die finanzielle Entwicklung abzufragen anhand verschiedener Methoden abzufragen.
+        Methoden:
+        - remaining_income
+        - x
+        - xx
+
+    :param method: XXX
+
+    :return: A list of dictionaries containing the data
+    """
     query = None
 
     match method:
         case "remaining_income":
             query = get_disposable_income_query()
+        # TODO add more cases here
         case "x":
             query = ""
         case "xx":
