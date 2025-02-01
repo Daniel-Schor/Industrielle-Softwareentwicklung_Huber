@@ -281,6 +281,51 @@ def get_xxx_query() -> select:
     return query
 
 
+def get_xxx_query_REGION() -> select:
+    query = select(
+        CostOfLivingAndIncome.Region,
+        CostOfLivingAndIncome.Year,
+        (func.avg(CostOfLivingAndIncome.Net_Income) -
+         func.avg(CostOfLivingAndIncome.Sum_Costs)).label("Remaining_Income")
+    ).group_by(CostOfLivingAndIncome.Region, CostOfLivingAndIncome.Year)
+
+    return query
+
+
+@router.get("/xxxREGION", response_model=List[dict])
+async def xxxREGION(
+    method: int,
+    session: AsyncSession = Depends(get_db)
+):
+    query = None
+
+    match method:
+        case 1:
+            query = get_xxx_query_REGION()
+        case 2:
+            return "You chose Option 2"
+        case 3:
+            return "You chose Option 3"
+        case _:
+            return "Invalid choice"
+
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(
+            status_code=404, detail=f"No data found for country: {country}")
+
+    return [
+        {
+            "Country": row[0],
+            "Year": row[1],
+            "Value": row[2]
+        }
+        for row in data
+    ]
+
+
 @router.get("/xxx", response_model=List[dict])
 async def xxx(
     method: int,
