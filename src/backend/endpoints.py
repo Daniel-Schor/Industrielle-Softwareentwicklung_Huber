@@ -136,6 +136,65 @@ async def get_country_data(
         for row in data
     ]
 
+
+
+@router.get("/all-information-for-region")
+async def get_all_data(session: AsyncSession = Depends(get_db)):
+    query = select(
+    CostOfLivingAndIncome.Region,
+    CostOfLivingAndIncome.Year,
+    CostOfLivingAndIncome.Average_Monthly_Income,
+    CostOfLivingAndIncome.Net_Income,
+    CostOfLivingAndIncome.Cost_of_Living,
+    CostOfLivingAndIncome.Housing_Cost_Percentage,
+    CostOfLivingAndIncome.Housing_Cost,
+    CostOfLivingAndIncome.Tax_Rate,
+    CostOfLivingAndIncome.Savings_Percentage,
+    CostOfLivingAndIncome.Savings,
+    CostOfLivingAndIncome.Healthcare_Cost_Percentage,
+    CostOfLivingAndIncome.Healthcare_Cost,
+    CostOfLivingAndIncome.Education_Cost_Percentage,
+    CostOfLivingAndIncome.Education_Cost,
+    CostOfLivingAndIncome.Transportation_Cost_Percentage,
+    CostOfLivingAndIncome.Transportation_Cost,
+    CostOfLivingAndIncome.Sum_Percentage,
+    CostOfLivingAndIncome.Sum,
+    CostOfLivingAndIncome.Sum_Costs,
+)
+    
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(status_code=404, detail="No data found.")
+    
+    return [
+        {
+            "Region": row[0],
+            "Year": row[1], 
+            "Average_Monthly_Income": row[2],
+            "Net_Income": row[3],
+            "Cost_of_Living": row[4],
+            "Housing_Cost_Percentage": row[5],
+            "Housing_Cost": row[6],
+            "Tax_Rate": row[7],
+            "Savings_Percentage": row[8],
+            "Savings": row[9],
+            "Healthcare_Cost_Percentage": row[10],
+            "Healthcare_Cost": row[11],
+            "Education_Cost_Percentage": row[12],
+            "Education_Cost": row[13],
+            "Transportation_Cost_Percentage": row[14],
+            "Transportation_Cost": row[15],
+            "Sum_Percentage": row[16],
+            "Sum": row[17],
+            "Sum_Costs": row[18]
+        }
+        for row in data
+    ]
+
+
+
 # Endpoint to get all columns for all rows
 @router.get("/all-information")
 async def get_all_data(session: AsyncSession = Depends(get_db)):
@@ -170,8 +229,8 @@ async def get_all_data(session: AsyncSession = Depends(get_db)):
     
     return [
         {
-            "Country": row[0],  # Country ist der zweite Wert
-            "Year": row[1],  # Jahr ist der dritte Wert
+            "Country": row[0],  
+            "Year": row[1],  
             "Average_Monthly_Income": row[2],
             "Net_Income": row[3],
             "Cost_of_Living": row[4],
