@@ -66,7 +66,7 @@ class Datei_Einlesen:
 
 if __name__ == "__main__":
     # Initialisiert die Verarbeitungsklasse mit dem Pfad zur CSV-Datei.
-    processor = Datei_Einlesen(r"data\CostOfLivingAndIncome.csv")
+    processor = Datei_Einlesen(r"Industrielle-Softwareentwicklung_Huber\src\database\ETL\data\CostOfLivingAndIncome.csv")
 
     # Speichert die Daten in der SQLite-Datenbank.
     processor.save_to_db('Database1.db', 'CostOfLivingAndIncome')
