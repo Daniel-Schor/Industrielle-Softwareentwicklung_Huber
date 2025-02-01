@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 import plotly.graph_objects as go
-from datetime import datetime
 import pandas as pd
 
 @st.cache_data
@@ -12,20 +11,19 @@ def fetch_region_data():
     else:
         st.error("Error fetching data.")
         return []
-    
+
 @st.cache_data
-def fetch_country(storeid):
+def fetch_country_data(country):
     url = f"http://localhost:8000/country-information/?country={country}"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
     else:
-        st.error("Error fetching store details")
-        return None    
+        st.error("Error fetching country details")
+        return []
 
 # Convert the data to a DataFrame for easier handling
 def convert_to_dataframe(data):
-    # List to hold the region, year, and average monthly income
     records = []
     for entry in data:
         records.append({
@@ -51,11 +49,11 @@ def convert_to_dataframe(data):
         })
     return pd.DataFrame(records)
 
-# Fetch data
-data = fetch_region_data()
+# Fetch region data
+region_data = fetch_region_data()
 
-# Convert data to DataFrame
-df = convert_to_dataframe(data)
+# Convert region data to DataFrame
+df_region = convert_to_dataframe(region_data)
 
 # Dropdown menu for selecting the Y-axis data
 y_axis_options = [
@@ -80,33 +78,58 @@ y_axis_options = [
 
 selected_y_axis = st.sidebar.selectbox("Wähle die Y-Achse", y_axis_options)
 
-# Create a plotly line chart based on the selected Y-axis data
-fig = go.Figure()
+# Create a plotly line chart for region data
+fig_region = go.Figure()
 
-# Iterate over the regions and plot the data for each region
-regions = df["Region"].unique()
+regions = df_region["Region"].unique()
 for region in regions:
-    region_data = df[df["Region"] == region]
-    fig.add_trace(go.Scatter(x=region_data["Year"], 
-                             y=region_data[selected_y_axis], 
-                             mode='lines', 
-                             name=region))
+    region_data = df_region[df_region["Region"] == region]
+    fig_region.add_trace(go.Scatter(x=region_data["Year"], 
+                                   y=region_data[selected_y_axis], 
+                                   mode='lines', 
+                                   name=region))
 
-# Update chart layout
-fig.update_layout(
+# Update chart layout for region data
+fig_region.update_layout(
     title=f"{selected_y_axis} by Year and Region",
     xaxis_title="Year",
     yaxis_title=selected_y_axis,
     template="plotly_dark"
 )
 
+# Fetch country data
+country = "Germany"  # Beispiel: Hier könnte das Land dynamisch eingegeben werden
+country_data = fetch_country_data(country)
 
+# Convert country data to DataFrame
+df_country = convert_to_dataframe(country_data)
 
+# Create a plotly line chart for country data
+fig_country = go.Figure()
+
+# Plot data for the selected country
+fig_country.add_trace(go.Scatter(x=df_country["Year"], 
+                                 y=df_country[selected_y_axis], 
+                                 mode='lines', 
+                                 name=country))
+
+# Update chart layout for country data
+fig_country.update_layout(
+    title=f"{selected_y_axis} by Year for {country}",
+    xaxis_title="Year",
+    yaxis_title=selected_y_axis,
+    template="plotly_dark"
+)
+
+# Layout with two columns
 col1, col2 = st.columns([1, 1])
-    
+
 with col1:
-    # Display the plot
-    st.plotly_chart(fig)
+    # Display the region plot
+    st.plotly_chart(fig_region)
     
+    # Display the country plot
+    st.plotly_chart(fig_country)
+
 with col2:    
     st.title("Hello World page 1")
