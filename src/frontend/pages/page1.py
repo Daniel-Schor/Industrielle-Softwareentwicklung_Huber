@@ -76,6 +76,21 @@ y_axis_options = [
     "Sum_Costs"
 ]
 
+country_options  = [
+    'Australia',
+    'Brazil',
+    'Canada',
+    'China',
+    'France',
+    'Germany',
+    'India',
+    'Japan',
+    'Mexico',
+    'Russia',
+    'South Africa',
+    'United States'
+ ]
+
 selected_y_axis = st.sidebar.selectbox("Wähle die Y-Achse", y_axis_options)
 
 # Create a plotly line chart for region data
@@ -97,9 +112,9 @@ fig_region.update_layout(
     template="plotly_dark"
 )
 
-# Fetch country data
-country = "Germany"  # Beispiel: Hier könnte das Land dynamisch eingegeben werden
-country_data = fetch_country_data(country)
+# Dropdown menu for selecting a country
+selected_country = st.sidebar.selectbox("Wähle ein Land", country_options) 
+country_data = fetch_country_data(selected_country)
 
 # Convert country data to DataFrame
 df_country = convert_to_dataframe(country_data)
@@ -111,23 +126,15 @@ fig_country = go.Figure()
 fig_country.add_trace(go.Scatter(x=df_country["Year"], 
                                  y=df_country[selected_y_axis], 
                                  mode='lines', 
-                                 name=country))
+                                 name=selected_country))
 
 # Update chart layout for country data
 fig_country.update_layout(
-    title=f"{selected_y_axis} by Year for {country}",
+    title=f"{selected_y_axis} by Year for {selected_country}",
     xaxis_title="Year",
     yaxis_title=selected_y_axis,
     template="plotly_dark"
 )
-
-
-# Fetch country data
-country = "Germany"  # Beispiel: Hier könnte das Land dynamisch eingegeben werden
-country_data = fetch_country_data(country)
-
-# Convert country data to DataFrame
-df_country = convert_to_dataframe(country_data)
 
 # Filter the data for the last available year for the selected country
 latest_year = df_country["Year"].max()
@@ -154,10 +161,9 @@ fig_pie = go.Figure(data=[go.Pie(labels=list(pie_data.keys()), values=list(pie_d
 
 # Update pie chart layout
 fig_pie.update_layout(
-    title=f"Distribution for {latest_year}",
+    title=f"Distribution for {latest_year} in {selected_country}",
     template="plotly_dark"
 )
-
 
 # Layout with two columns
 col1, col2 = st.columns([1, 1])
@@ -170,5 +176,10 @@ with col1:
     st.plotly_chart(fig_country)
 
 with col2: 
-    st.plotly_chart(fig_pie)   
-    st.title("Hello World page 1")
+    # Display the pie chart
+    st.title(" . ")
+    st.title(" . ")
+    st.title(" . ")
+    st.title(" . ")
+    st.title(" . ")
+    st.plotly_chart(fig_pie)
