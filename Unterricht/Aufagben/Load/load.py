@@ -284,6 +284,8 @@ if __name__ == "__main__":
                encoding="utf-8-sig"), DB_FILE, NAME)
 
     # show_db(DB_FILE, QUERIES.get("select_all"))
+    print(enc(CONFIG.get("USERNAME")))
+    print(enc(CONFIG.get("PASSWORD")))
 
     print(dec(CONFIG.get("USERNAME")))
     print(dec(CONFIG.get("PASSWORD")))
