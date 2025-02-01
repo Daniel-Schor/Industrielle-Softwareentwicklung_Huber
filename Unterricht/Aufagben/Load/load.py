@@ -223,44 +223,90 @@ class FinancialDataProcessor:
                         encoding="utf-8-sig", index=False)
 
 
-def save_to_db(df: pd.DataFrame, db_name: str, table_name: str):
-    """Speichert die Daten in einer SQLite-Datenbank."""
+def save_to_db(
+    df: pd.DataFrame,
+    db_name: str,
+    table_name: str
+) -> None:
+    """
+        Speichert die Daten in einer SQLite-Datenbank.
+
+    :param df: DataFrame, der in der Datenbank gespeichert werden soll
+    :param db_name: Name der SQLite-Datenbank
+    """
     with sqlite3.connect(db_name) as connection:
         df.to_sql(table_name, connection, if_exists='replace', index=False)
         connection.commit()
 
 
-def show_db(db_name: str, query: str = None):
-    """Liest die Daten aus der SQLite-Datenbank und gibt sie als Tabelle aus."""
+def show_db(
+        db_name: str,
+        query: str = None
+) -> None:
+    """
+        Liest die Daten aus der SQLite-Datenbank und gibt sie als Tabelle aus.
+
+    :param db_name: Name der SQLite-Datenbank
+    :param query: SQL-Abfrage, die ausgeführt werden soll
+    """
+
     with sqlite3.connect(db_name) as connection:
         df = pd.read_sql_query(query, connection)
         print(tabulate(df, headers='keys', tablefmt='psql'))
 
 
-def enc(text: str) -> str:
+def enc(
+        text: str
+) -> str:
+    """
+        Verschlüsselt den Text, indem jeder Buchstabe um 1 erhöht wird.
+
+    :param text: Text, der verschlüsselt werden soll
+    """
     encrypted_text = "".join(chr(ord(i) + 1) for i in text)
     return encrypted_text
 
 
-def dec(text: str) -> str:
+def dec(
+        text: str
+) -> str:
+    """
+        Entschlüsselt den Text, indem jeder Buchstabe um 1 verringert wird.
+
+    :param text: Text, der entschlüsselt werden soll
+    """
+
     decrypted_text = "".join(chr(ord(i) - 1) for i in text)
     return decrypted_text
 
+# FIXME fix issues
 
-def split_df(df: pd.DataFrame):
-    # TODO implementieren
+
+def split_df(
+        df: pd.DataFrame
+) -> tuple:
     """
         Teilt den DataFrame in 4 Teile und speichert sie als 4 Tabellen.
 
     :param df: DataFrame, der in 4 Teile geteilt werden soll
+
+    :return: Tuple aus DataFrames (df_sales, df_product, df_discount, df_month_year)
     """
 
-    df1 = df["Product", "Discounts"]
-    df2 = None
-    df3 = None
-    df4 = None
+    # Extract Sales Table
+    df_sales = df[["Units Sold", "Sale Price",
+                   "Gross Sales", "COGS", "Profit"]].copy()
 
-    return (df1, df2, df3, df4)
+    # Extract Product Table
+    df_product = df[["Segment", "Country", "Product"]].copy()
+
+    # Extract Discount Table
+    df_discount = df[["Discount Band", "Discounts"]].copy()
+
+    # Extract MonthYear Table
+    df_month_year = df[["Date", "MonthYear"]].copy()
+
+    return df_sales, df_product, df_discount, df_month_year
 
 
 if __name__ == "__main__":
@@ -290,22 +336,22 @@ if __name__ == "__main__":
 
     # ---------------
 
-    # [ ] 3.1a)
+    # [x] 3.1a)
     # [x] 3.1b)
     # [x] 3.1c)
     # [x] 3.2a)
     # [x] 3.2b)
 
-    # TODO aufteilen des DFs in 4 Teile und dann als 4 Tabellen speichern
-    df1, df2, df3, df4 = split_df(pd.read_csv(MODIFIED_FILE, sep=";",
-                                              encoding="utf-8-sig"))
-    save_to_db(df1, DB_FILE, "df1")
-    save_to_db(df2, DB_FILE, "df2")
-    save_to_db(df3, DB_FILE, "df3")
-    save_to_db(df4, DB_FILE, "df4")
+    # Lesen des modifizierten CSV-Datei
+    df = pd.read_csv(MODIFIED_FILE, sep=";", encoding="utf-8-sig")
+    # Teilen des DataFrames in 4 Teile
+    df_sales, df_product, df_discount, df_month_year = split_df(df)
 
-    # show_db(DB_FILE, QUERIES.get("select_all"))
-    # write user/pw to yaml file
+    # DataFrames in SQLite-Datenbank speichern
+    save_to_db(df_sales, DB_FILE, "Sales")
+    save_to_db(df_product, DB_FILE, "Product")
+    save_to_db(df_discount, DB_FILE, "Discount")
+    save_to_db(df_month_year, DB_FILE, "MonthYear")
 
     username = enc("Admin")
     password = enc("1234")
