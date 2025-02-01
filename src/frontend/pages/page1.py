@@ -3,8 +3,15 @@ import requests
 import plotly.graph_objects as go
 import pandas as pd
 
+
 @st.cache_data
-def fetch_region_data():
+def fetch_region_data() -> requests.json:
+    """
+        Ruft die Daten für alle Regionen ab
+
+    :return: Die Daten für alle Regionen
+    """
+
     response = requests.get('http://localhost:8000/all-information-for-region')
     if response.status_code == 200:
         return response.json()
@@ -12,8 +19,17 @@ def fetch_region_data():
         st.error("Error fetching data.")
         return []
 
+
 @st.cache_data
-def fetch_country_data(country):
+def fetch_country_data(country) -> requests.json:
+    """
+        Ruft die Daten für das angegebene Land ab
+
+    :param country: Das Land, für das die Daten abgerufen werden sollen
+
+    :return: Die Daten für das angegebene Land
+    """
+
     url = f"http://localhost:8000/country-information/?country={country}"
     response = requests.get(url)
     if response.status_code == 200:
@@ -23,7 +39,17 @@ def fetch_country_data(country):
         return []
 
 # Convert the data to a DataFrame for easier handling
-def convert_to_dataframe(data):
+
+
+def convert_to_dataframe(data) -> pd.DataFrame:
+    """
+        Konvertiert Daten in ein DataFrame
+
+    :param data: Die Daten, die in ein DataFrame konvertiert werden sollen
+
+    :return: Ein DataFrame mit den konvertierten Daten
+    """
+
     records = []
     for entry in data:
         records.append({
@@ -48,6 +74,7 @@ def convert_to_dataframe(data):
             "Sum_Costs": entry["Sum_Costs"]
         })
     return pd.DataFrame(records)
+
 
 # Fetch region data
 region_data = fetch_region_data()
@@ -76,7 +103,7 @@ y_axis_options = [
     "Sum_Costs"
 ]
 
-country_options  = [
+country_options = [
     'Australia',
     'Brazil',
     'Canada',
@@ -89,7 +116,7 @@ country_options  = [
     'Russia',
     'South Africa',
     'United States'
- ]
+]
 
 selected_y_axis = st.sidebar.selectbox("Wähle die Y-Achse", y_axis_options)
 
@@ -99,10 +126,10 @@ fig_region = go.Figure()
 regions = df_region["Region"].unique()
 for region in regions:
     region_data = df_region[df_region["Region"] == region]
-    fig_region.add_trace(go.Scatter(x=region_data["Year"], 
-                                   y=region_data[selected_y_axis], 
-                                   mode='lines', 
-                                   name=region))
+    fig_region.add_trace(go.Scatter(x=region_data["Year"],
+                                    y=region_data[selected_y_axis],
+                                    mode='lines',
+                                    name=region))
 
 # Update chart layout for region data
 fig_region.update_layout(
@@ -113,7 +140,7 @@ fig_region.update_layout(
 )
 
 # Dropdown menu for selecting a country
-selected_country = st.sidebar.selectbox("Wähle ein Land", country_options) 
+selected_country = st.sidebar.selectbox("Wähle ein Land", country_options)
 country_data = fetch_country_data(selected_country)
 
 # Convert country data to DataFrame
@@ -123,9 +150,9 @@ df_country = convert_to_dataframe(country_data)
 fig_country = go.Figure()
 
 # Plot data for the selected country
-fig_country.add_trace(go.Scatter(x=df_country["Year"], 
-                                 y=df_country[selected_y_axis], 
-                                 mode='lines', 
+fig_country.add_trace(go.Scatter(x=df_country["Year"],
+                                 y=df_country[selected_y_axis],
+                                 mode='lines',
                                  name=selected_country))
 
 # Update chart layout for country data
@@ -157,7 +184,8 @@ pie_columns = [
 pie_data = latest_year_data[pie_columns].iloc[0].to_dict()
 
 # Create a Plotly pie chart
-fig_pie = go.Figure(data=[go.Pie(labels=list(pie_data.keys()), values=list(pie_data.values()), hole=0.3)])
+fig_pie = go.Figure(data=[go.Pie(labels=list(
+    pie_data.keys()), values=list(pie_data.values()), hole=0.3)])
 
 # Update pie chart layout
 fig_pie.update_layout(
@@ -173,14 +201,13 @@ with col1:
     st.title(" . ")
     st.title(" . ")
     st.title(" . ")
-    st.title(" . ") 
+    st.title(" . ")
     # Display the country plot
     st.plotly_chart(fig_country)
 
-with col2: 
+with col2:
     # Display the region plot
     st.plotly_chart(fig_region)
-    
-    
+
     # Display the pie chart
     st.plotly_chart(fig_pie)
