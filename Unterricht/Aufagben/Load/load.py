@@ -117,6 +117,7 @@ class FinancialDataProcessor:
 
         :return: [Liste der Positionen der lokalen Maxima, Liste der Indexes der größten Maxima]
         """
+
         try:
             series = self._df[column].map(
                 lambda x: convert_money_to_float(x))
@@ -160,6 +161,7 @@ class FinancialDataProcessor:
 
         :return: DataFrame mit jeder X-ten Zeile
         """
+
         try:
             grouped_subset = pd.read_csv(
                 MODIFIED_FILE,
@@ -185,6 +187,7 @@ class FinancialDataProcessor:
 
         :param column: Name der Spalte, in der die Rabattwerte geändert werden sollen
         """
+
         def categorize_discount(
                 discount: str
         ) -> str:
@@ -198,6 +201,7 @@ class FinancialDataProcessor:
 
             :return: Kategorie des Rabattwerts
             """
+
             discount = convert_money_to_float(discount)
             if discount <= 200:
                 return "Low"
@@ -219,6 +223,7 @@ class FinancialDataProcessor:
         """
             Speichert den aktuellen DataFrame in einer CSV-Datei.
         """
+
         # self.print_tail()
         self._df.to_csv(MODIFIED_FILE, sep=";",
                         encoding="utf-8-sig", index=False)
@@ -235,6 +240,7 @@ def save_to_db(
     :param df: DataFrame, der in der Datenbank gespeichert werden soll
     :param db_name: Name der SQLite-Datenbank
     """
+
     with sqlite3.connect(db_name) as connection:
         df.to_sql(table_name, connection, if_exists='replace', index=False)
         connection.commit()
@@ -264,6 +270,7 @@ def enc(
 
     :param text: Text, der verschlüsselt werden soll
     """
+
     encrypted_text = "".join(chr(ord(i) + 1) for i in text)
     return encrypted_text
 
