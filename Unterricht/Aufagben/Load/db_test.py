@@ -75,7 +75,7 @@ class TestFinancialSampleDatabase(unittest.TestCase):
             FinancialSample.Country == 'Germany',
             FinancialSample.Segment == 'Channel Partners',
             FinancialSample.Product == 'Montana',
-            FinancialSample.__table__.c["Units Sold"] == 1545  # Use the column name with spaces
+            FinancialSample.__table__.c["Units Sold"] == 1545
         )
         
         result = self.session.execute(query).fetchone()
