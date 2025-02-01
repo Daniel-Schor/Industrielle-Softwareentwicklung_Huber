@@ -247,6 +247,22 @@ def dec(text: str) -> str:
     return decrypted_text
 
 
+def split_df(df: pd.DataFrame):
+    # TODO implementieren
+    """
+        Teilt den DataFrame in 4 Teile und speichert sie als 4 Tabellen.
+
+    :param df: DataFrame, der in 4 Teile geteilt werden soll
+    """
+
+    df1 = df["Product", "Discounts"]
+    df2 = None
+    df3 = None
+    df4 = None
+
+    return (df1, df2, df3, df4)
+
+
 if __name__ == "__main__":
     # Initialisiert die Verarbeitungsklasse mit dem Pfad zur CSV-Datei.
     processor = FinancialDataProcessor(SOURCE_FILE)
@@ -280,8 +296,13 @@ if __name__ == "__main__":
     # [x] 3.2a)
     # [x] 3.2b)
 
-    save_to_db(pd.read_csv(MODIFIED_FILE, sep=";",
-               encoding="utf-8-sig"), DB_FILE, NAME)
+    # TODO aufteilen des DFs in 4 Teile und dann als 4 Tabellen speichern
+    df1, df2, df3, df4 = split_df(pd.read_csv(MODIFIED_FILE, sep=";",
+                                              encoding="utf-8-sig"))
+    save_to_db(df1, DB_FILE, "df1")
+    save_to_db(df2, DB_FILE, "df2")
+    save_to_db(df3, DB_FILE, "df3")
+    save_to_db(df4, DB_FILE, "df4")
 
     # show_db(DB_FILE, QUERIES.get("select_all"))
     # write user/pw to yaml file
