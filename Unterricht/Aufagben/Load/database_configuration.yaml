@@ -1,7 +1,7 @@
-USERNAME: 'Ufbn2'
-PASSWORD: 'QX2'
-DIR: 'Unterricht/Aufagben/Load/' 
-NAME: 'FinancialSample'
+DIR: Unterricht/Aufagben/Load/
+NAME: FinancialSample
+PASSWORD: '2345'
 QUERIES:
-  select_all: 'SELECT * FROM FinancialSample'
-  query2: 'SELECT * FROM table2'
+  query2: SELECT * FROM table2
+  select_all: SELECT * FROM FinancialSample
+USERNAME: Benjo

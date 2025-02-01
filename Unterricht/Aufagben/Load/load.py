@@ -182,7 +182,7 @@ class FinancialDataProcessor:
         """
             Ändert den Rabattwert in der Spalte 'Discounts'.
 
-        :param column: Name der Spalte, in der die Rabattwerte geändert werden sollen    
+        :param column: Name der Spalte, in der die Rabattwerte geändert werden sollen
         """
         def categorize_discount(
                 discount: str
@@ -190,7 +190,7 @@ class FinancialDataProcessor:
             """
                 Kategorisiert den Rabattwert in 'Low', 'Medium' oder 'High'.
                 Wenn discount ≤ 200 → Low
-                Wenn discount > 200 and <  2000 → Medium 
+                Wenn discount > 200 and <  2000 → Medium
                 Wenn discount ≥ 2000 → High
 
             :param discount: Rabattwert, der kategorisiert werden soll
@@ -284,8 +284,21 @@ if __name__ == "__main__":
                encoding="utf-8-sig"), DB_FILE, NAME)
 
     # show_db(DB_FILE, QUERIES.get("select_all"))
-    print(enc(CONFIG.get("USERNAME")))
-    print(enc(CONFIG.get("PASSWORD")))
+    # write user/pw to yaml file
 
-    print(dec(CONFIG.get("USERNAME")))
-    print(dec(CONFIG.get("PASSWORD")))
+    username = enc("Admin")
+    password = enc("1234")
+    print(f"Encoded username: {username}")
+    print(f"Encoded password: {password}")
+
+    CONFIG["USERNAME"] = username
+    CONFIG["PASSWORD"] = password
+
+    with open(CONFIG_FILE, "w") as file:
+        yaml.dump(CONFIG, file)
+
+    with open(CONFIG_FILE, "r") as file:
+        CONFIG: dict = dict(yaml.safe_load(file))
+
+    print(f'Decoded username: {dec(CONFIG.get("USERNAME"))}')
+    print(f'Decoded username: {dec(CONFIG.get("PASSWORD"))}')
