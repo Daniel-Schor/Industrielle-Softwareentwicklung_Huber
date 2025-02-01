@@ -1,40 +1,88 @@
 import unittest
+import sqlite3
+import random
+from sqlalchemy import create_engine, Column, String, Integer, Float, select
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-# FILLER CODE
+Base = declarative_base()
 
+class FinancialSample(Base):
+    __tablename__ = 'FinancialSample'
+    Country = Column(String, primary_key=True)
+    Segment = Column(String)
+    Product = Column(String)
+    Units_Sold = Column(Integer, name="Units Sold")
+    Discount_Band = Column(String, name="Discount Band")
+    Manufacturing_Price = Column(Float, name="Manufacturing Price")
+    Sale_Price = Column(Float, name="Sale Price")
+    Gross_Sales = Column(Float, name="Gross Sales")
+    Discounts = Column(Float)
+    Sales = Column(Float)
+    COGS = Column(Float)
+    Profit = Column(Float)
+    Date = Column(String)
+    MonthYear = Column(String)
 
-def is_primzahl(n: int) -> bool:
-    if n < 2:
-        return False
-    for i in range(2, int(n**0.5 + 1)):
-        if n % i == 0:
-            return False
-    return True
+class TestFinancialSampleDatabase(unittest.TestCase):
+    def setUp(self):
+        # Verbindung zur Datenbank herstellen
+        self.connection = sqlite3.connect(r'Unterricht\Aufagben\Load\FinancialSample.db')
+        self.cursor = self.connection.cursor()
+        self.engine = create_engine('sqlite:///Unterricht/Aufagben/Load/FinancialSample.db')
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
 
+    def tearDown(self):
+        # Verbindung zur Datenbank schließen
+        self.connection.close()
+        self.session.close()
 
-class PrimzahlTestCase(unittest.TestCase):
-    def test_primzahl(self):
-        primzahl = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
-        for i in primzahl:
-            self.assertTrue(is_primzahl(i), f"{i} ist keine Primzahl")
+    def test_sample_data(self):
+        # Liste der Länder
+        countries = ['United States', 'Mexico', 'France', 'Germany', 'Canada']
+        
+        # Zufälliges Land auswählen
+        random_country = random.choice(countries)
+        
+        # Abfrage mit dem zufälligen Land ausführen
+        self.cursor.execute("SELECT * FROM FinancialSample WHERE Country = ?", (random_country,))
+        rows = self.cursor.fetchall()
+        print(len(rows))
+        # Überprüfen, ob die Anzahl der Zeilen korrekt ist
+        
+        if len(rows) != 140:
+            self.fail(f'Die Daten für {random_country} sind nicht korrekt')
+        else:
+            self.assertTrue(True)
+        
+    def test_number_of_rows(self):
+        # Anzahl der Zeilen in der Tabelle FinancialSample
+        self.cursor.execute("SELECT COUNT(*) FROM FinancialSample")
+        count = self.cursor.fetchone()[0]
+        
+        # Überprüfen, ob die Anzahl der Zeilen korrekt ist
+        if count != 700:
+            self.fail('Die Anzahl der Zeilen in der Tabelle FinancialSample ist nicht korrekt')
+        else:
+            self.assertTrue(True)
 
-    def test_keine_primzahl(self):
-        keine_primzahl = [4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20]
-        for i in keine_primzahl:
-            self.assertFalse(is_primzahl(i), f"{i} ist eine Primzahl")
+    def test_mont_ger(self):
+        # Überprüfe, ob der Eintrag mit Segment = Channel Partners und Country = Germany und Product = Montana 1545 als Wert bei Units Sold hat
+        query = select(
+            FinancialSample
+        ).where(
+            FinancialSample.Country == 'Germany',
+            FinancialSample.Segment == 'Channel Partners',
+            FinancialSample.Product == 'Montana',
+            FinancialSample.__table__.c["Units Sold"] == 1545  # Use the column name with spaces
+        )
+        
+        result = self.session.execute(query).fetchone()
+        if result is None:
+            self.fail('Eintrag nicht gefunden')
+        else:
+            self.assertTrue(True)
 
-
-def is_palindrom(s: str) -> bool:
-    return s == s[::-1]
-
-
-class PalindromTestCase(unittest.TestCase):
-    def test_palindrom(self):
-        palindrom = ["anna", "otto", "rentner", "lagerregal"]
-        for i in palindrom:
-            self.assertTrue(is_palindrom(i), f"{i} ist kein Palindrom")
-
-    def test_kein_palindrom(self):
-        kein_palindrom = ["test", "hallo", "welt", "python"]
-        for i in kein_palindrom:
-            self.assertFalse(is_palindrom(i), f"{i} ist ein Palindrom")
+if __name__ == '__main__':
+    unittest.main()
