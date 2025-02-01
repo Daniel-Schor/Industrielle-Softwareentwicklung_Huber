@@ -11,7 +11,7 @@ import os
 
 # Absolute path to the database file
 DATABASE_PATH = os.path.join(
-    os.getcwd(), 'src', 'database', 'ETL', 'Database1.db'
+    os.getcwd(), 'src', 'database', 'CostOfLivingAndIncome.db'
 )
 
 #database URL to the absolute path
