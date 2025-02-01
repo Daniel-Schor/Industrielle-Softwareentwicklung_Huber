@@ -315,6 +315,26 @@ def get_disposable_income_query() -> select:
 
     return query
 
+
+def get_disposable_income_query_REGION() -> select:
+    """
+        Query für die Berechnung des verfügbaren Einkommens gruppiert nach Regionen
+
+    :return: sqlalchemy Query
+    """
+
+    query = select(
+        CostOfLivingAndIncome.Region,
+        CostOfLivingAndIncome.Year,
+        (func.avg(CostOfLivingAndIncome.Net_Income) -
+         func.avg(CostOfLivingAndIncome.Sum_Costs)).label("Remaining_Income")
+    ).group_by(CostOfLivingAndIncome.Region, CostOfLivingAndIncome.Year)
+
+    return query
+
+
+# ---
+
 # TODO Add more queries here
 
 
@@ -334,51 +354,7 @@ def get_x_query() -> select:
     return query
 
 
-# def get_disposable_income_query_REGION() -> select:
-#    query = select(
-#        CostOfLivingAndIncome.Region,
-#        CostOfLivingAndIncome.Year,
-#        (func.avg(CostOfLivingAndIncome.Net_Income) -
-#         func.avg(CostOfLivingAndIncome.Sum_Costs)).label("Remaining_Income")
-#    ).group_by(CostOfLivingAndIncome.Region, CostOfLivingAndIncome.Year)
-#
-#    return query
-#
 # -------------------------------------
-#
-#
-# @router.get("/xxxREGION", response_model=List[dict])
-# async def xxxREGION(
-#    method: int,
-#    session: AsyncSession = Depends(get_db)
-# ):
-#    query = None
-#
-#    match method:
-#        case 1:
-#            query = get_disposable_income_query_REGION()
-#        case 2:
-#            return "You chose Option 2"
-#        case 3:
-#            return "You chose Option 3"
-#        case _:
-#            return "Invalid choice"
-#
-#    result = await session.execute(query)
-#    data = result.fetchall()
-#
-#    if not data:
-#        raise HTTPException(
-#            status_code=404, detail=f"No data found for country: {country}")
-#
-#    return [
-#        {
-#            "Country": row[0],
-#            "Year": row[1],
-#            "Value": row[2]
-#        }
-#        for row in data
-#    ]
 
 
 @router.get("/financial-development", response_model=List[dict])
@@ -387,7 +363,7 @@ async def financial_development(
     session: AsyncSession = Depends(get_db)
 ) -> List[dict]:
     """
-        Endoint um die finanzielle Entwicklung abzufragen anhand verschiedener Methoden abzufragen.
+        Endoint um die finanzielle Entwicklung in verschiedenen Ländern anhand verschiedener Methoden abzufragen.
         Methoden:
         - remaining_income
         - x
@@ -402,6 +378,54 @@ async def financial_development(
     match method:
         case "remaining_income":
             query = get_disposable_income_query()
+        # TODO add more cases here
+        case "x":
+            query = ""
+        case "xx":
+            query = ""
+        case _:
+            raise HTTPException(
+                status_code=404, detail=f"No method: '{method}' found.")
+
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(
+            status_code=404, detail=f"No data found for method: {method}.")
+
+    return [
+        {
+            "Country": row[0],
+            "Year": row[1],
+            "Value": row[2],
+            "Method": method
+        }
+        for row in data
+    ]
+
+
+@router.get("/financial_development_region", response_model=List[dict])
+async def financial_development_region(
+    method: str,
+    session: AsyncSession = Depends(get_db)
+) -> List[dict]:
+    """
+        Endoint um die finanzielle Entwicklung in verschiedenen Regionen anhand verschiedener Methoden abzufragen.
+        Methoden:
+        - remaining_income
+        - x
+        - xx
+
+    :param method: XXX
+
+    :return: A list of dictionaries containing the data
+    """
+    query = None
+
+    match method:
+        case "remaining_income":
+            query = get_disposable_income_query_REGION()
         # TODO add more cases here
         case "x":
             query = ""
