@@ -169,17 +169,18 @@ fig_pie.update_layout(
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    # Display the region plot
-    st.plotly_chart(fig_region)
-    
+    st.title(" . ")
+    st.title(" . ")
+    st.title(" . ")
+    st.title(" . ")
+    st.title(" . ") 
     # Display the country plot
     st.plotly_chart(fig_country)
 
 with col2: 
+    # Display the region plot
+    st.plotly_chart(fig_region)
+    
+    
     # Display the pie chart
-    st.title(" . ")
-    st.title(" . ")
-    st.title(" . ")
-    st.title(" . ")
-    st.title(" . ")
     st.plotly_chart(fig_pie)
