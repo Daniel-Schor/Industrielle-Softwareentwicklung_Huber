@@ -26,9 +26,27 @@ Base = declarative_base()
 class CostOfLivingAndIncome(Base):
     __tablename__ = "CostOfLivingAndIncome"
 
-    id = Column(Integer, primary_key=True, index=True)
-    Country = Column(String, index=True)
+    Country = Column(String, primary_key=True, index=True)  # Country als Primärschlüssel
+    Year = Column(Integer)
     Average_Monthly_Income = Column(Float)
+    Net_Income = Column(Float)
+    Cost_of_Living = Column(Float)
+    Housing_Cost_Percentage = Column(Float)
+    Housing_Cost = Column(Float)
+    Tax_Rate = Column(Float)
+    Savings_Percentage = Column(Float)
+    Savings = Column(Float)
+    Healthcare_Cost_Percentage = Column(Float)
+    Healthcare_Cost = Column(Float)
+    Education_Cost_Percentage = Column(Float)
+    Education_Cost = Column(Float)
+    Transportation_Cost_Percentage = Column(Float)
+    Transportation_Cost = Column(Float)
+    Sum_Percentage = Column(Float)
+    Sum = Column(Float)
+    Sum_Costs = Column(Float)
+    Region = Column(String)
+
 
 # Initialize the router for FastAPI
 router = APIRouter()
@@ -52,6 +70,65 @@ async def get_average_monthly_income(session: AsyncSession = Depends(get_db)):
         {
             "Country": row[0],
             "Average_Monthly_Income": row[1]
+        }
+        for row in data
+    ]
+
+
+# Endpoint to get all columns for all rows (mit Indizes)
+@router.get("/all-information")
+async def get_all_data(session: AsyncSession = Depends(get_db)):
+    query = select(
+    CostOfLivingAndIncome.Country,
+    CostOfLivingAndIncome.Year,
+    CostOfLivingAndIncome.Average_Monthly_Income,
+    CostOfLivingAndIncome.Net_Income,
+    CostOfLivingAndIncome.Cost_of_Living,
+    CostOfLivingAndIncome.Housing_Cost_Percentage,
+    CostOfLivingAndIncome.Housing_Cost,
+    CostOfLivingAndIncome.Tax_Rate,
+    CostOfLivingAndIncome.Savings_Percentage,
+    CostOfLivingAndIncome.Savings,
+    CostOfLivingAndIncome.Healthcare_Cost_Percentage,
+    CostOfLivingAndIncome.Healthcare_Cost,
+    CostOfLivingAndIncome.Education_Cost_Percentage,
+    CostOfLivingAndIncome.Education_Cost,
+    CostOfLivingAndIncome.Transportation_Cost_Percentage,
+    CostOfLivingAndIncome.Transportation_Cost,
+    CostOfLivingAndIncome.Sum_Percentage,
+    CostOfLivingAndIncome.Sum,
+    CostOfLivingAndIncome.Sum_Costs,
+    CostOfLivingAndIncome.Region
+)
+    
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(status_code=404, detail="No data found.")
+    
+    return [
+        {
+            "Country": row[0],  # Country ist der zweite Wert
+            "Year": row[1],  # Jahr ist der dritte Wert
+            "Average_Monthly_Income": row[2],
+            "Net_Income": row[3],
+            "Cost_of_Living": row[4],
+            "Housing_Cost_Percentage": row[5],
+            "Housing_Cost": row[6],
+            "Tax_Rate": row[7],
+            "Savings_Percentage": row[8],
+            "Savings": row[9],
+            "Healthcare_Cost_Percentage": row[10],
+            "Healthcare_Cost": row[11],
+            "Education_Cost_Percentage": row[12],
+            "Education_Cost": row[13],
+            "Transportation_Cost_Percentage": row[14],
+            "Transportation_Cost": row[15],
+            "Sum_Percentage": row[16],
+            "Sum": row[17],
+            "Sum_Costs": row[18],
+            "Region": row[19]
         }
         for row in data
     ]
