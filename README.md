@@ -27,10 +27,17 @@ Dies ist ein Projekt für ein Dashboard zur analyse der CostOfLivingAndIncome Da
 > **env Verzeichnis aktivieren**
 ``` env\Scripts\activate ```
 
+> **backend (FastAPI) starten** (Man muss im <Industrielle-Softwareentwicklung_Huber> Ordnerverzeichnis sein)
+``` uvicorn src.main:app --reload ```
+
 > **frontend (streamlit) starten**
 ``` streamlit run src\frontend\frontend.py ```
 
 ---
+
+FastAPI Swagger UI
+http://127.0.0.1:8000/docs
+
 
 ## Credits
 
