@@ -6,8 +6,8 @@ import yaml
 from tabulate import tabulate
 
 # read yaml file
-CONFIG_FILE: str = os.path.join(
-    "Unterricht/Aufagben/Load/", "database_configuration.yaml")
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+CONFIG_FILE = os.path.join(ROOT, "Load/database_configuration.yaml")
 
 with open(CONFIG_FILE, "r") as file:
     CONFIG: dict = dict(yaml.safe_load(file))
