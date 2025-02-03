@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import uuid
 import pandas as pd
 import datetime as dt
 import yaml
@@ -116,6 +117,7 @@ class FinancialDataProcessor:
 
         :return: [Liste der Positionen der lokalen Maxima, Liste der Indexes der größten Maxima]
         """
+
         try:
             series = self._df[column].map(
                 lambda x: convert_money_to_float(x))
@@ -159,6 +161,7 @@ class FinancialDataProcessor:
 
         :return: DataFrame mit jeder X-ten Zeile
         """
+
         try:
             grouped_subset = pd.read_csv(
                 MODIFIED_FILE,
@@ -184,6 +187,7 @@ class FinancialDataProcessor:
 
         :param column: Name der Spalte, in der die Rabattwerte geändert werden sollen
         """
+
         def categorize_discount(
                 discount: str
         ) -> str:
@@ -197,6 +201,7 @@ class FinancialDataProcessor:
 
             :return: Kategorie des Rabattwerts
             """
+
             discount = convert_money_to_float(discount)
             if discount <= 200:
                 return "Low"
@@ -218,6 +223,7 @@ class FinancialDataProcessor:
         """
             Speichert den aktuellen DataFrame in einer CSV-Datei.
         """
+
         # self.print_tail()
         self._df.to_csv(MODIFIED_FILE, sep=";",
                         encoding="utf-8-sig", index=False)
@@ -234,6 +240,7 @@ def save_to_db(
     :param df: DataFrame, der in der Datenbank gespeichert werden soll
     :param db_name: Name der SQLite-Datenbank
     """
+
     with sqlite3.connect(db_name) as connection:
         df.to_sql(table_name, connection, if_exists='replace', index=False)
         connection.commit()
@@ -263,6 +270,7 @@ def enc(
 
     :param text: Text, der verschlüsselt werden soll
     """
+
     encrypted_text = "".join(chr(ord(i) + 1) for i in text)
     return encrypted_text
 
@@ -279,7 +287,13 @@ def dec(
     decrypted_text = "".join(chr(ord(i) - 1) for i in text)
     return decrypted_text
 
-# FIXME fix issues
+
+def generate_id():
+    """
+        Generiert eine ID
+    """
+
+    return str(uuid.uuid4())
 
 
 def split_df(
@@ -293,20 +307,35 @@ def split_df(
     :return: Tuple aus DataFrames (df_sales, df_product, df_discount, df_month_year)
     """
 
-    # Extract Sales Table
-    df_sales = df[["Units Sold", "Sale Price",
-                   "Gross Sales", "COGS", "Profit"]].copy()
+    # Erstellt eine Tabelle mit den Produkten und generiert eine ID
+    df_product = df[["Segment", "Country", "Product"]].drop_duplicates().copy()
+    df_product["Product_ID"] = df_product.apply(
+        lambda x: generate_id(), axis=1)
 
-    # Extract Product Table
-    df_product = df[["Segment", "Country", "Product"]].copy()
+    # Erstellt eine Tabelle mit Rabatten und generiert eine ID
+    df_discount = df[["Discount Band", "Discounts"]].drop_duplicates().copy()
+    df_discount["Discount_ID"] = df_discount.apply(
+        lambda x: generate_id(), axis=1)
 
-    # Extract Discount Table
-    df_discount = df[["Discount Band", "Discounts"]].copy()
+    # Erstellt eine Tabelle mit Dates und generiert eine ID
+    df_date = df[["Date", "MonthYear"]].drop_duplicates().copy()
+    df_date["MonthYear_ID"] = df_date.apply(lambda x: generate_id(), axis=1)
 
-    # Extract MonthYear Table
-    df_month_year = df[["Date", "MonthYear"]].copy()
+    # Erstellt eine Sales Tabelle mit FKs
+    df_sales = df[["Units Sold", "Sale Price", "Gross Sales", "COGS", "Profit",
+                   "Segment", "Country", "Product", "Discount Band", "MonthYear"]].copy()
 
-    return df_sales, df_product, df_discount, df_month_year
+    # FKs mappen
+    df_sales = df_sales.merge(
+        df_product, on=["Segment", "Country", "Product"], how="left")
+    df_sales = df_sales.merge(df_discount, on=["Discount Band"], how="left")
+    df_sales = df_sales.merge(df_date, on=["MonthYear"], how="left")
+
+    # Benötigte Spalten auswählen
+    df_sales = df_sales[["Units Sold", "Sale Price", "Gross Sales",
+                         "COGS", "Profit", "Product_ID", "Discount_ID", "MonthYear_ID"]]
+
+    return df_sales, df_product, df_discount, df_date
 
 
 if __name__ == "__main__":
@@ -336,22 +365,16 @@ if __name__ == "__main__":
 
     # ---------------
 
-    # [x] 3.1a)
-    # [x] 3.1b)
-    # [x] 3.1c)
-    # [x] 3.2a)
-    # [x] 3.2b)
-
     # Lesen des modifizierten CSV-Datei
     df = pd.read_csv(MODIFIED_FILE, sep=";", encoding="utf-8-sig")
     # Teilen des DataFrames in 4 Teile
-    df_sales, df_product, df_discount, df_month_year = split_df(df)
+    df_sales, df_product, df_discount, df_date = split_df(df)
 
     # DataFrames in SQLite-Datenbank speichern
     save_to_db(df_sales, DB_FILE, "Sales")
     save_to_db(df_product, DB_FILE, "Product")
     save_to_db(df_discount, DB_FILE, "Discount")
-    save_to_db(df_month_year, DB_FILE, "MonthYear")
+    save_to_db(df_date, DB_FILE, "Date")
 
     username = enc("Admin")
     password = enc("1234")
