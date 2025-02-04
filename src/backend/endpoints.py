@@ -464,7 +464,6 @@ async def financial_development_region(
 
 # -------------------------------------
 
-# TODO replicate with multiple years
 @router.get("/recommended-countries", response_model=List[dict])
 async def recommended_countries(
     healthcare_multiplicator: int = 1,
@@ -485,7 +484,27 @@ async def recommended_countries(
         - education_multiplicator
         - income_multiplicator
 
+        Länder:
+        - Australia
+        - Brazil
+        - Canada
+        - China
+        - France
+        - Germany
+        - India
+        - Japan
+        - Mexico
+        - Russia
+        - South Africa
+        - United States
 
+        Regionen:
+        - Africa
+        - Asia
+        - Europe
+        - North America
+        - Oceania
+        - South America
 
     :param healthcare_multiplicator: XXX
     :param education_multiplicator: XXX
