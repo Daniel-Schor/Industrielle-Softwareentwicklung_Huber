@@ -528,7 +528,11 @@ async def recommended_countries(
 
     where = (CostOfLivingAndIncome.Year >= start_year)
     if region:
-        where &= (CostOfLivingAndIncome.Region == region)
+        if extra_country:
+            where &= ((CostOfLivingAndIncome.Region == region) |
+                      (CostOfLivingAndIncome.Country == extra_country))
+        else:
+            where &= (CostOfLivingAndIncome.Region == region)
 
     query = select(
         CostOfLivingAndIncome.Country,
