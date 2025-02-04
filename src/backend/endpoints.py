@@ -1,4 +1,6 @@
 import os
+import re
+from turtle import up, update
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import create_engine, Column, Integer, String, Float, func
 from sqlalchemy.ext.declarative import declarative_base
@@ -72,6 +74,7 @@ async def get_db():
         yield session
 
 
+# OUTDATED
 @router.get("/average-income")
 async def get_average_monthly_income(session: AsyncSession = Depends(get_db)):
     """
@@ -97,6 +100,7 @@ async def get_average_monthly_income(session: AsyncSession = Depends(get_db)):
     ]
 
 
+# OUTDATED
 @router.get("/country-information", response_model=List[dict])
 async def get_country_data(
     country: str,
@@ -165,6 +169,7 @@ async def get_country_data(
     ]
 
 
+# OUTDATED
 @router.get("/all-information-for-region")
 async def get_all_data_for_region(session: AsyncSession = Depends(get_db)) -> List[dict]:
     """
@@ -235,6 +240,7 @@ async def get_all_data_for_region(session: AsyncSession = Depends(get_db)) -> Li
     ]
 
 
+# OUTDATED
 @router.get("/all-information")
 async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
     """
@@ -299,7 +305,7 @@ async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
 
 # -------------------------------------
 
-
+# OUTDATED
 def get_disposable_income_query() -> select:
     """
         Query für die Berechnung des verfügbaren Einkommens
@@ -315,7 +321,7 @@ def get_disposable_income_query() -> select:
 
     return query
 
-
+# OUTDATED
 def get_disposable_income_query_REGION() -> select:
     """
         Query für die Berechnung des verfügbaren Einkommens gruppiert nach Regionen
@@ -335,9 +341,8 @@ def get_disposable_income_query_REGION() -> select:
 
 # ---
 
-# TODO Add more queries here
 
-
+# OUTDATED
 def get_x_query() -> select:
     """
         Query für XXX
@@ -356,7 +361,7 @@ def get_x_query() -> select:
 
 # -------------------------------------
 
-
+# OUTDATED
 @router.get("/financial-development", response_model=List[dict])
 async def financial_development(
     method: str,
@@ -378,7 +383,6 @@ async def financial_development(
     match method:
         case "remaining_income":
             query = get_disposable_income_query()
-        # TODO add more cases here
         case "x":
             query = ""
         case "xx":
@@ -404,7 +408,7 @@ async def financial_development(
         for row in data
     ]
 
-
+# OUTDATED
 @router.get("/financial_development_region", response_model=List[dict])
 async def financial_development_region(
     method: str,
@@ -426,7 +430,6 @@ async def financial_development_region(
     match method:
         case "remaining_income":
             query = get_disposable_income_query_REGION()
-        # TODO add more cases here
         case "x":
             query = ""
         case "xx":
@@ -452,4 +455,94 @@ async def financial_development_region(
         for row in data
     ]
 
+
+
 # -------------------------------------
+
+# TODO replicate with multiple years
+@router.get("/recommended-countries", response_model=List[dict])
+async def recommended_countries(
+    healthcare_multiplicator: int,
+    education_multiplicator: int,
+    income_multiplicator: float,
+    extra_country: str = None,
+    session: AsyncSession = Depends(get_db)
+) -> List[dict]:
+    """
+        Überprüft anhand von verschiedenen Faktoren, 
+        bei welchen Ländern für ein Leben im Ausland das meiste Geld vom Einkommen übrig bleibt.
+        Ermöglicht ein weiteres Land auszuwählen, um zu sehen, wie es im Vergleich abschneidet.
+        
+        Faktoren:
+        - healthcare_multiplicator
+        - education_multiplicator
+        - income_multiplicator
+
+
+
+    :param healthcare_multiplicator: XXX
+    :param education_multiplicator: XXX
+    :param income_multiplicator: XXX
+    :param extra_country: XXX
+
+    :return: A list of dictionaries containing the data
+    """
+
+    query = select(
+        CostOfLivingAndIncome.Country,
+        CostOfLivingAndIncome.Average_Monthly_Income,
+        CostOfLivingAndIncome.Net_Income,
+        CostOfLivingAndIncome.Housing_Cost,
+        CostOfLivingAndIncome.Tax_Rate,
+        CostOfLivingAndIncome.Healthcare_Cost,
+        CostOfLivingAndIncome.Education_Cost,
+        CostOfLivingAndIncome.Transportation_Cost,
+    ).where(CostOfLivingAndIncome.Year == 2023)
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(
+            status_code=404, detail=f"No data found for {query}.")
+
+
+    selected_country = None
+    countries = []
+    for row in data:
+        current_country = {
+            "Country": row[0],
+            "Average_Monthly_Income": row[1],
+            "Net_Income": row[2],
+            "Housing_Cost": row[3],
+            "Tax_Rate": row[4],
+            "Healthcare_Cost": row[5],
+            "Education_Cost": row[6],
+            "Transportation_Cost": row[7],
+                  }
+
+        current_country["Net_Income"] = current_country["Net_Income"] * income_multiplicator
+        current_country["Healthcare_Cost"] = current_country["Healthcare_Cost"] * healthcare_multiplicator
+        current_country["Education_Cost"] = current_country["Education_Cost"] * education_multiplicator
+        current_country["Savings"] = current_country["Net_Income"] - current_country["Housing_Cost"] - current_country["Healthcare_Cost"] - current_country["Education_Cost"] - current_country["Transportation_Cost"]
+
+        if extra_country == current_country["Country"]:
+            current_country["Country"] = f'{current_country["Country"]} (Selected)'
+            selected_country = current_country
+
+        countries.append(current_country)
+
+    countries.sort(key=lambda x: x["Savings"], reverse=True)
+
+    countries = countries[:4]
+    for i in countries:
+        if i["Country"].endswith("(Selected)"):
+            return countries
+    
+    if selected_country:
+        countries[-1] = selected_country
+    else:
+        countries = countries[:3]
+
+    # XXX hier mehrere Jahre einfügen?
+
+    return countries
