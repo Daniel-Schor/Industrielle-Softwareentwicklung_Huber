@@ -466,6 +466,7 @@ async def recommended_countries(
     education_multiplicator: int,
     income_multiplicator: float,
     extra_country: str = None,
+    start_year: int = 2021,
     session: AsyncSession = Depends(get_db)
 ) -> List[dict]:
     """
@@ -484,9 +485,14 @@ async def recommended_countries(
     :param education_multiplicator: XXX
     :param income_multiplicator: XXX
     :param extra_country: XXX
+    :param start_year: XXX
 
     :return: A list of dictionaries containing the data
     """
+
+    if healthcare_multiplicator < 0 or education_multiplicator < 0 or income_multiplicator < 0:
+        raise HTTPException(
+            status_code=400, detail="Multiplicators must be greater than 0.")
 
     query = select(
         CostOfLivingAndIncome.Country,
@@ -497,7 +503,10 @@ async def recommended_countries(
         CostOfLivingAndIncome.Healthcare_Cost,
         CostOfLivingAndIncome.Education_Cost,
         CostOfLivingAndIncome.Transportation_Cost,
-    ).where(CostOfLivingAndIncome.Year == 2023)
+        CostOfLivingAndIncome.Year
+    ).where(CostOfLivingAndIncome.Year >= start_year)
+
+
     result = await session.execute(query)
     data = result.fetchall()
 
@@ -505,9 +514,8 @@ async def recommended_countries(
         raise HTTPException(
             status_code=404, detail=f"No data found for {query}.")
 
-
     selected_country = None
-    countries = []
+    all_countries = []
     for row in data:
         current_country = {
             "Country": row[0],
@@ -518,31 +526,67 @@ async def recommended_countries(
             "Healthcare_Cost": row[5],
             "Education_Cost": row[6],
             "Transportation_Cost": row[7],
+            "Year": row[8]
                   }
 
+        current_country["Average_Monthly_Income"] = current_country["Average_Monthly_Income"] * income_multiplicator
         current_country["Net_Income"] = current_country["Net_Income"] * income_multiplicator
         current_country["Healthcare_Cost"] = current_country["Healthcare_Cost"] * healthcare_multiplicator
         current_country["Education_Cost"] = current_country["Education_Cost"] * education_multiplicator
         current_country["Savings"] = current_country["Net_Income"] - current_country["Housing_Cost"] - current_country["Healthcare_Cost"] - current_country["Education_Cost"] - current_country["Transportation_Cost"]
 
-        if extra_country == current_country["Country"]:
+        if extra_country and extra_country == current_country["Country"]:
             current_country["Country"] = f'{current_country["Country"]} (Selected)'
-            selected_country = current_country
+            if current_country["Year"] == 2023:
+                selected_country = current_country
 
-        countries.append(current_country)
+        all_countries.append(current_country)
 
-    countries.sort(key=lambda x: x["Savings"], reverse=True)
+    # Filtert länder nach Jahr 2023
+    top_countries = [x for x in all_countries if x["Year"] == 2023]
 
-    countries = countries[:4]
-    for i in countries:
+    # Sortiert die Länder nach Savings
+    top_countries.sort(key=lambda x: x["Savings"], reverse=True)
+
+    # Wählt die Top 4 Länder aus
+    top_countries = top_countries[:4]
+    # Wenn keins der Länder ausgewählt wurde...
+    for i in top_countries:
         if i["Country"].endswith("(Selected)"):
-            return countries
-    
-    if selected_country:
-        countries[-1] = selected_country
-    else:
-        countries = countries[:3]
+            break
+    # ...wird das letzte Land...
+    else: 
+        # ... mit dem ausgewählten ersezt
+        if selected_country:
+            top_countries[-1] = selected_country
+        # ... oder entfernt wenn kein Land ausgewählt wurde
+        else:
+            top_countries = top_countries[:3]
 
-    # XXX hier mehrere Jahre einfügen?
+# TODO komplexität reduzieren!
+# -- Hinzufügen der anderen Jahre --
 
-    return countries
+    new_countries = top_countries.copy()
+
+    # Dict was Country als Key hat und eine Liste von Countries als Value
+    missing_country_years_sorted = {}
+    for country in all_countries:
+        if country["Country"] not in missing_country_years_sorted:
+            missing_country_years_sorted[country["Country"]] = []
+        missing_country_years_sorted[country["Country"]].append(country)
+
+    for top_country in top_countries:
+        # Sortiert die Länder nach jahr für jeden Dict eintrag und speichert diese als Liste
+        previous_years = sorted(
+            [c for c in missing_country_years_sorted.get(top_country["Country"], []) if c["Year"] != 2023],
+            key=lambda x: -x["Year"]
+        )
+
+        # Sucht den Index des aktuellen Landes
+        insert_index = new_countries.index(top_country) + 1
+        # Fügt die Länder/Jahre in die Liste ein
+        new_countries[insert_index:insert_index] = previous_years
+
+    return new_countries
+
+
