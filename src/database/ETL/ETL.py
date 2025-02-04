@@ -84,8 +84,8 @@ class ETL_Handler:
         # 6.
         self._df.sort_values(by=["Country", "Year"], inplace=True)
 
-        # 7.
-        self.fill_missing_values()
+        # 7. Störend mit dem neuen Datensatz
+        # self.fill_missing_values()
 
         # 7.5
         self._df["Region"] = self._df["Country"].map(region_dict)
