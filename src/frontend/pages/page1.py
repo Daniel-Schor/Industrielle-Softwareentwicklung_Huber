@@ -17,7 +17,7 @@ def create_stacked_bar_chart(data):
     gap_between_groups = 0.6  # größerer Abstand zwischen den Gruppen
     gap_within_group = 0.05   # kleinerer Abstand innerhalb der Gruppen
 
-    colors = ['#984ea3', '#ff7f00', '#ff7f00', '#e41a1c', '#377eb8', '#4daf4a']
+    colors = ['orange', 'blue', 'green', '#e41a1c', '#377eb8', '#4daf4a']
 
     position = 0  # Positionstracker für die Balken
     x_labels = []  # Liste für die Beschriftungen der x-Achse
@@ -54,7 +54,7 @@ def create_stacked_bar_chart(data):
                         marker=dict(color=colors[1]),
                         base=year_data['Housing_Cost'],
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[1]};'>Housing Cost</span><br>{year_data['Healthcare_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"<span style='color:{colors[1]};'>Healthcare Cost</span><br>{year_data['Healthcare_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                     fig.add_trace(go.Bar(
@@ -65,7 +65,7 @@ def create_stacked_bar_chart(data):
                         base=year_data['Housing_Cost'] +
                         year_data['Healthcare_Cost'],
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[2]};'>Healthcare Cost</span><br>{year_data['Education_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"<span style='color:{colors[2]};'>Education Cost</span><br>{year_data['Education_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                     fig.add_trace(go.Bar(
@@ -77,7 +77,7 @@ def create_stacked_bar_chart(data):
                         year_data['Healthcare_Cost'] +
                         year_data['Education_Cost'],
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[3]};'>Education Cost</span><br>{year_data['Transportation_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"<span style='color:{colors[3]};'>Transportation Cost</span><br>{year_data['Transportation_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
                 elif category == 'Income':
                     fig.add_trace(go.Bar(
