@@ -8,7 +8,7 @@ country_options = [
 ]
 
 @st.cache_data
-def fetch_recommendation_data(extra_country: str, healthcare_multiplicator: float, education_multiplicator: float, income_multiplicator: float) -> dict:
+def fetch_recommendation_data(extra_country: str, healthcare_multiplicator: int, education_multiplicator: int, income_multiplicator: int) -> dict:
     start_year = 2021
 
     url = f"http://localhost:8000/recommended-countries?healthcare_multiplicator={healthcare_multiplicator}&education_multiplicator={education_multiplicator}&income_multiplicator={income_multiplicator}&extra_country={extra_country}&start_year={start_year}"
@@ -123,13 +123,15 @@ def create_stacked_bar_chart(data):
 
     st.plotly_chart(fig)
 
-
-st.title("Stacked Bar Chart Visualization")
 extra_country = st.sidebar.selectbox("Select Extra Country", country_options, index=country_options.index("Germany"))
-healthcare_multiplicator = st.sidebar.number_input("Healthcare Multiplicator", min_value=0.0, value=1.0, step=0.1)
-education_multiplicator = st.sidebar.number_input("Education Multiplicator", min_value=0.0, value=1.0, step=0.1)
-income_multiplicator = st.sidebar.number_input("Income Multiplicator", min_value=0.0, value=1.0, step=0.1)
+healthcare_multiplicator = st.sidebar.number_input("Healthcare Multiplicator", min_value=0, value=1, step=1)
+education_multiplicator = st.sidebar.number_input("Education Multiplicator", min_value=0, value=1, step=1)
+income_multiplicator = st.sidebar.number_input("Income Multiplicator", min_value=0, value=1, step=1)
 
-data = fetch_recommendation_data(extra_country, healthcare_multiplicator, education_multiplicator, income_multiplicator)
-if data:
-    create_stacked_bar_chart(data)
+# Validierung der Eingabe
+if education_multiplicator > healthcare_multiplicator or income_multiplicator > healthcare_multiplicator:
+    st.warning("Education and Income Multiplicator must be smaller or equal to Healthcare Multiplicator")
+else:
+    data = fetch_recommendation_data(extra_country, healthcare_multiplicator, education_multiplicator, income_multiplicator)
+    if data:
+        create_stacked_bar_chart(data)
