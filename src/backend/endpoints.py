@@ -1,3 +1,4 @@
+import math
 import os
 import re
 from turtle import up, update
@@ -268,6 +269,11 @@ async def recommended_countries(
             income_multiplicator
         current_country["Healthcare_Cost"] = current_country["Healthcare_Cost"] * \
             healthcare_multiplicator
+        current_country["Transportation_Cost"] = current_country["Transportation_Cost"] * \
+            (healthcare_multiplicator * 0.5)
+        # Beibehalten?
+        current_country["Housing_Cost"] = current_country["Housing_Cost"] * \
+            (math.ceil(int(healthcare_multiplicator / 5)))
         current_country["Education_Cost"] = current_country["Education_Cost"] * \
             education_multiplicator
         current_country["Savings"] = current_country["Net_Income"] - current_country["Housing_Cost"] - \
