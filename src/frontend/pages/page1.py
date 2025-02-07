@@ -8,10 +8,7 @@ country_options = [
 ]
 
 @st.cache_data
-def fetch_recommendation_data(extra_country: str) -> dict:
-    healthcare_multiplicator = 1
-    education_multiplicator = 1
-    income_multiplicator = 1
+def fetch_recommendation_data(extra_country: str, healthcare_multiplicator: float, education_multiplicator: float, income_multiplicator: float) -> dict:
     start_year = 2021
 
     url = f"http://localhost:8000/recommended-countries?healthcare_multiplicator={healthcare_multiplicator}&education_multiplicator={education_multiplicator}&income_multiplicator={income_multiplicator}&extra_country={extra_country}&start_year={start_year}"
@@ -129,6 +126,10 @@ def create_stacked_bar_chart(data):
 
 st.title("Stacked Bar Chart Visualization")
 extra_country = st.sidebar.selectbox("Select Extra Country", country_options, index=country_options.index("Germany"))
-data = fetch_recommendation_data(extra_country)
+healthcare_multiplicator = st.sidebar.number_input("Healthcare Multiplicator", min_value=0.0, value=1.0, step=0.1)
+education_multiplicator = st.sidebar.number_input("Education Multiplicator", min_value=0.0, value=1.0, step=0.1)
+income_multiplicator = st.sidebar.number_input("Income Multiplicator", min_value=0.0, value=1.0, step=0.1)
+
+data = fetch_recommendation_data(extra_country, healthcare_multiplicator, education_multiplicator, income_multiplicator)
 if data:
     create_stacked_bar_chart(data)
