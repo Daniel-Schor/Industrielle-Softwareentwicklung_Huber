@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import create_engine, Column, Integer, String, Float, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.future import select
+from sqlalchemy.sql import select, distinct
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from typing import List
 
@@ -74,138 +74,26 @@ async def get_db():
         yield session
 
 
-# OUTDATED
-@router.get("/average-income")
-async def get_average_monthly_income(session: AsyncSession = Depends(get_db)):
-    """
-        Endpoint to get Average_Monthly_Income for all Countries
-
-    :returns: Das ergebnis der Abfrage
-    """
-
-    query = select(CostOfLivingAndIncome.Country,
-                   CostOfLivingAndIncome.Average_Monthly_Income)
-    result = await session.execute(query)
-    data = result.fetchall()
-
-    if not data:
-        raise HTTPException(status_code=404, detail="No data found.")
-
-    return [
-        {
-            "Country": row[0],
-            "Average_Monthly_Income": row[1]
-        }
-        for row in data
-    ]
-
-
-# OUTDATED
-@router.get("/country-information", response_model=List[dict])
-async def get_country_data(
-    country: str,
-    session: AsyncSession = Depends(get_db)
-):
-    """
-        Endpoint um alle Daten für ein bestimmtes Land abzufragen
-
-    :param country: Das Land für das die Daten abgefragt werden sollen
-    :returns: Das ergebnis der Abfrage
-    """
-    query = select(
-        CostOfLivingAndIncome.Country,
-        CostOfLivingAndIncome.Year,
-        CostOfLivingAndIncome.Average_Monthly_Income,
-        CostOfLivingAndIncome.Net_Income,
-        CostOfLivingAndIncome.Cost_of_Living,
-        CostOfLivingAndIncome.Housing_Cost_Percentage,
-        CostOfLivingAndIncome.Housing_Cost,
-        CostOfLivingAndIncome.Tax_Rate,
-        CostOfLivingAndIncome.Savings_Percentage,
-        CostOfLivingAndIncome.Savings,
-        CostOfLivingAndIncome.Healthcare_Cost_Percentage,
-        CostOfLivingAndIncome.Healthcare_Cost,
-        CostOfLivingAndIncome.Education_Cost_Percentage,
-        CostOfLivingAndIncome.Education_Cost,
-        CostOfLivingAndIncome.Transportation_Cost_Percentage,
-        CostOfLivingAndIncome.Transportation_Cost,
-        CostOfLivingAndIncome.Sum_Percentage,
-        CostOfLivingAndIncome.Sum,
-        CostOfLivingAndIncome.Sum_Costs,
-        CostOfLivingAndIncome.Region
-    ).where(CostOfLivingAndIncome.Country == country)
-
-    result = await session.execute(query)
-    data = result.fetchall()
-
-    if not data:
-        raise HTTPException(
-            status_code=404, detail=f"No data found for country: {country}")
-
-    return [
-        {
-            "Country": row[0],
-            "Year": row[1],
-            "Average_Monthly_Income": row[2],
-            "Net_Income": row[3],
-            "Cost_of_Living": row[4],
-            "Housing_Cost_Percentage": row[5],
-            "Housing_Cost": row[6],
-            "Tax_Rate": row[7],
-            "Savings_Percentage": row[8],
-            "Savings": row[9],
-            "Healthcare_Cost_Percentage": row[10],
-            "Healthcare_Cost": row[11],
-            "Education_Cost_Percentage": row[12],
-            "Education_Cost": row[13],
-            "Transportation_Cost_Percentage": row[14],
-            "Transportation_Cost": row[15],
-            "Sum_Percentage": row[16],
-            "Sum": row[17],
-            "Sum_Costs": row[18],
-            "Region": row[19]
-        }
-        for row in data
-    ]
-
-
-# OUTDATED
 @router.get("/all-information-for-region")
 async def get_all_data_for_region(session: AsyncSession = Depends(get_db)) -> List[dict]:
     """
         Endpoint um alle Daten gruppiert nach Regionen abzufragen
-
-    :returns: Das ergebnis der Abfrage
+    :returns: Das Ergebnis der Abfrage
     """
-
     query = select(
-        CostOfLivingAndIncome.Region,
-        CostOfLivingAndIncome.Year,
-        func.avg(CostOfLivingAndIncome.Average_Monthly_Income).label(
-            "Average_Monthly_Income"),
-        func.avg(CostOfLivingAndIncome.Net_Income).label("Net_Income"),
-        func.avg(CostOfLivingAndIncome.Cost_of_Living).label("Cost_of_Living"),
-        func.avg(CostOfLivingAndIncome.Housing_Cost_Percentage).label(
-            "Housing_Cost_Percentage"),
-        func.avg(CostOfLivingAndIncome.Housing_Cost).label("Housing_Cost"),
-        func.avg(CostOfLivingAndIncome.Tax_Rate).label("Tax_Rate"),
-        func.avg(CostOfLivingAndIncome.Savings_Percentage).label(
-            "Savings_Percentage"),
-        func.avg(CostOfLivingAndIncome.Savings).label("Savings"),
-        func.avg(CostOfLivingAndIncome.Healthcare_Cost_Percentage).label(
-            "Healthcare_Cost_Percentage"),
-        func.avg(CostOfLivingAndIncome.Healthcare_Cost).label(
-            "Healthcare_Cost"),
-        func.avg(CostOfLivingAndIncome.Education_Cost_Percentage).label(
-            "Education_Cost_Percentage"),
-        func.avg(CostOfLivingAndIncome.Education_Cost).label("Education_Cost"),
-        func.avg(CostOfLivingAndIncome.Transportation_Cost_Percentage).label(
-            "Transportation_Cost_Percentage"),
-        func.avg(CostOfLivingAndIncome.Transportation_Cost).label(
-            "Transportation_Cost"),
-        func.avg(CostOfLivingAndIncome.Sum_Percentage).label("Sum_Percentage"),
-        func.avg(CostOfLivingAndIncome.Sum).label("Sum"),
-        func.avg(CostOfLivingAndIncome.Sum_Costs).label("Sum_Costs")
+        CostOfLivingAndIncome.Region,                       
+        CostOfLivingAndIncome.Year,                        
+        func.avg(CostOfLivingAndIncome.Average_Monthly_Income).label("Average_Monthly_Income"),  
+        func.avg(CostOfLivingAndIncome.Net_Income).label("Net_Income"),                          
+        func.avg(CostOfLivingAndIncome.Cost_of_Living).label("Cost_of_Living"),                
+        func.avg(CostOfLivingAndIncome.Housing_Cost_Percentage).label("Housing_Cost_Percentage"),
+        func.avg(CostOfLivingAndIncome.Housing_Cost).label("Housing_Cost"),                      
+        func.avg(CostOfLivingAndIncome.Savings).label("Savings"),                              
+        func.avg(CostOfLivingAndIncome.Healthcare_Cost).label("Healthcare_Cost"),               
+        func.avg(CostOfLivingAndIncome.Education_Cost).label("Education_Cost"),                  
+        func.avg(CostOfLivingAndIncome.Transportation_Cost).label("Transportation_Cost"),       
+        func.avg(CostOfLivingAndIncome.Sum).label("Sum"),                                        
+        func.avg(CostOfLivingAndIncome.Sum_Costs).label("Sum_Costs")                             
     ).group_by(CostOfLivingAndIncome.Region, CostOfLivingAndIncome.Year)
 
     result = await session.execute(query)
@@ -223,37 +111,29 @@ async def get_all_data_for_region(session: AsyncSession = Depends(get_db)) -> Li
             "Cost_of_Living": row[4],
             "Housing_Cost_Percentage": row[5],
             "Housing_Cost": row[6],
-            "Tax_Rate": row[7],
-            "Savings_Percentage": row[8],
-            "Savings": row[9],
-            "Healthcare_Cost_Percentage": row[10],
-            "Healthcare_Cost": row[11],
-            "Education_Cost_Percentage": row[12],
-            "Education_Cost": row[13],
-            "Transportation_Cost_Percentage": row[14],
-            "Transportation_Cost": row[15],
-            "Sum_Percentage": row[16],
-            "Sum": row[17],
-            "Sum_Costs": row[18]
+            "Savings": row[7],
+            "Healthcare_Cost": row[8],
+            "Education_Cost": row[9],
+            "Transportation_Cost": row[10],
+            "Sum": row[11],
+            "Sum_Costs": row[12]
         }
         for row in data
     ]
 
 
-# OUTDATED
 @router.get("/all-information")
 async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
     """
         Endpoint um alle Daten abzufragen
-
-    :returns: Das ergebnis der Abfrage
+    :returns: Das Ergebnis der Abfrage
     """
     query = select(
         CostOfLivingAndIncome.Country,
         CostOfLivingAndIncome.Year,
         CostOfLivingAndIncome.Average_Monthly_Income,
         CostOfLivingAndIncome.Net_Income,
-        CostOfLivingAndIncome.Cost_of_Living,
+        CostOfLivingAndIncome.Cost_of_Living,  # Sicherstellen, dass der Alias gesetzt ist
         CostOfLivingAndIncome.Housing_Cost_Percentage,
         CostOfLivingAndIncome.Housing_Cost,
         CostOfLivingAndIncome.Tax_Rate,
@@ -283,7 +163,7 @@ async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
             "Year": row[1],
             "Average_Monthly_Income": row[2],
             "Net_Income": row[3],
-            "Cost_of_Living": row[4],
+            "Cost_of_Living": row[4],  
             "Housing_Cost_Percentage": row[5],
             "Housing_Cost": row[6],
             "Tax_Rate": row[7],
@@ -303,166 +183,103 @@ async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
         for row in data
     ]
 
-# -------------------------------------
-
-# OUTDATED
 
 
-def get_disposable_income_query() -> select:
+@router.get("/country-information", response_model=List[dict])
+async def get_country_data(
+    country: str,
+    start_year: int = None,
+    session: AsyncSession = Depends(get_db)
+):
     """
-        Query für die Berechnung des verfügbaren Einkommens
+        Endpoint um alle relevanten Daten für ein bestimmtes Land abzufragen
 
-    :return: sqlalchemy Query
+    :param country: Das Land für das die Daten abgefragt werden sollen
+    :returns: Das ergebnis der Abfrage
     """
+
+    where = (CostOfLivingAndIncome.Country == country)
+    if start_year:
+        where &= (CostOfLivingAndIncome.Year >= start_year)
+
     query = select(
         CostOfLivingAndIncome.Country,
         CostOfLivingAndIncome.Year,
-        (CostOfLivingAndIncome.Net_Income -
-         CostOfLivingAndIncome.Sum_Costs).label("Remaining_Income")
-    )
-
-    return query
-
-# OUTDATED
-
-
-def get_disposable_income_query_REGION() -> select:
-    """
-        Query für die Berechnung des verfügbaren Einkommens gruppiert nach Regionen
-
-    :return: sqlalchemy Query
-    """
-
-    query = select(
+        CostOfLivingAndIncome.Average_Monthly_Income,
+        CostOfLivingAndIncome.Net_Income,
+        CostOfLivingAndIncome.Housing_Cost,
+        CostOfLivingAndIncome.Healthcare_Cost,
+        CostOfLivingAndIncome.Education_Cost,
+        CostOfLivingAndIncome.Transportation_Cost,
         CostOfLivingAndIncome.Region,
-        CostOfLivingAndIncome.Year,
-        (func.avg(CostOfLivingAndIncome.Net_Income) -
-         func.avg(CostOfLivingAndIncome.Sum_Costs)).label("Remaining_Income")
-    ).group_by(CostOfLivingAndIncome.Region, CostOfLivingAndIncome.Year)
-
-    return query
-
-
-# ---
-
-
-# OUTDATED
-def get_x_query() -> select:
-    """
-        Query für XXX
-
-    :return: XXX
-    """
-    query = select(
-        CostOfLivingAndIncome.Country,
-        CostOfLivingAndIncome.Year,
-        (CostOfLivingAndIncome.Net_Income -
-         CostOfLivingAndIncome.Sum_Costs).label("Remaining_Income")
-    )
-
-    return query
-
-
-# -------------------------------------
-
-# OUTDATED
-@router.get("/financial-development", response_model=List[dict])
-async def financial_development(
-    method: str,
-    session: AsyncSession = Depends(get_db)
-) -> List[dict]:
-    """
-        Endoint um die finanzielle Entwicklung in verschiedenen Ländern anhand verschiedener Methoden abzufragen.
-        Methoden:
-        - remaining_income
-        - x
-        - xx
-
-    :param method: XXX
-
-    :return: A list of dictionaries containing the data
-    """
-    query = None
-
-    match method:
-        case "remaining_income":
-            query = get_disposable_income_query()
-        case "x":
-            query = ""
-        case "xx":
-            query = ""
-        case _:
-            raise HTTPException(
-                status_code=404, detail=f"No method: '{method}' found.")
+        CostOfLivingAndIncome.Savings
+    ).where(where)
 
     result = await session.execute(query)
     data = result.fetchall()
 
     if not data:
         raise HTTPException(
-            status_code=404, detail=f"No data found for method: {method}.")
+            status_code=404, detail=f"No data found for country: {country}")
 
     return [
         {
             "Country": row[0],
             "Year": row[1],
-            "Value": row[2],
-            "Method": method
+            "Average_Monthly_Income": row[2],
+            "Net_Income": row[3],
+            "Housing_Cost": row[4],
+            "Healthcare_Cost": row[5],
+            "Education_Cost": row[6],
+            "Transportation_Cost": row[7],
+            "Region": row[8],
+            "Savings": row[9]
         }
         for row in data
     ]
 
-# OUTDATED
 
-
-@router.get("/financial_development_region", response_model=List[dict])
-async def financial_development_region(
-    method: str,
+@router.get("/regions", response_model=List[str])
+async def get_regions(
     session: AsyncSession = Depends(get_db)
-) -> List[dict]:
+) -> List[str]:
     """
-        Endoint um die finanzielle Entwicklung in verschiedenen Regionen anhand verschiedener Methoden abzufragen.
-        Methoden:
-        - remaining_income
-        - x
-        - xx
 
-    :param method: XXX
-
-    :return: A list of dictionaries containing the data
+    :return: 
     """
-    query = None
 
-    match method:
-        case "remaining_income":
-            query = get_disposable_income_query_REGION()
-        case "x":
-            query = ""
-        case "xx":
-            query = ""
-        case _:
-            raise HTTPException(
-                status_code=404, detail=f"No method: '{method}' found.")
+    query = select(distinct(CostOfLivingAndIncome.Region))
 
     result = await session.execute(query)
     data = result.fetchall()
 
     if not data:
         raise HTTPException(
-            status_code=404, detail=f"No data found for method: {method}.")
+            status_code=404, detail="No data found.")
 
-    return [
-        {
-            "Country": row[0],
-            "Year": row[1],
-            "Value": row[2],
-            "Method": method
-        }
-        for row in data
-    ]
+    return [row[0] for row in data]
 
 
-# -------------------------------------
+@router.get("/countries", response_model=List[str])
+async def get_countries(
+    session: AsyncSession = Depends(get_db)
+) -> List[str]:
+    """
+
+    :return: 
+    """
+
+    query = select(distinct(CostOfLivingAndIncome.Country))
+
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(
+            status_code=404, detail="No data found.")
+
+    return [row[0] for row in data]
+
 
 @router.get("/recommended-countries", response_model=List[dict])
 async def recommended_countries(
@@ -483,20 +300,6 @@ async def recommended_countries(
         - healthcare_multiplicator
         - education_multiplicator
         - income_multiplicator
-
-        Länder:
-        - Australia
-        - Brazil
-        - Canada
-        - China
-        - France
-        - Germany
-        - India
-        - Japan
-        - Mexico
-        - Russia
-        - South Africa
-        - United States
 
         Regionen:
         - Africa
