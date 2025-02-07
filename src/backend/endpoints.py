@@ -101,75 +101,6 @@ async def get_average_monthly_income(session: AsyncSession = Depends(get_db)):
 
 
 # OUTDATED
-@router.get("/country-information", response_model=List[dict])
-async def get_country_data(
-    country: str,
-    session: AsyncSession = Depends(get_db)
-):
-    """
-        Endpoint um alle Daten für ein bestimmtes Land abzufragen
-
-    :param country: Das Land für das die Daten abgefragt werden sollen
-    :returns: Das ergebnis der Abfrage
-    """
-    query = select(
-        CostOfLivingAndIncome.Country,
-        CostOfLivingAndIncome.Year,
-        CostOfLivingAndIncome.Average_Monthly_Income,
-        CostOfLivingAndIncome.Net_Income,
-        CostOfLivingAndIncome.Cost_of_Living,
-        CostOfLivingAndIncome.Housing_Cost_Percentage,
-        CostOfLivingAndIncome.Housing_Cost,
-        CostOfLivingAndIncome.Tax_Rate,
-        CostOfLivingAndIncome.Savings_Percentage,
-        CostOfLivingAndIncome.Savings,
-        CostOfLivingAndIncome.Healthcare_Cost_Percentage,
-        CostOfLivingAndIncome.Healthcare_Cost,
-        CostOfLivingAndIncome.Education_Cost_Percentage,
-        CostOfLivingAndIncome.Education_Cost,
-        CostOfLivingAndIncome.Transportation_Cost_Percentage,
-        CostOfLivingAndIncome.Transportation_Cost,
-        CostOfLivingAndIncome.Sum_Percentage,
-        CostOfLivingAndIncome.Sum,
-        CostOfLivingAndIncome.Sum_Costs,
-        CostOfLivingAndIncome.Region
-    ).where(CostOfLivingAndIncome.Country == country)
-
-    result = await session.execute(query)
-    data = result.fetchall()
-
-    if not data:
-        raise HTTPException(
-            status_code=404, detail=f"No data found for country: {country}")
-
-    return [
-        {
-            "Country": row[0],
-            "Year": row[1],
-            "Average_Monthly_Income": row[2],
-            "Net_Income": row[3],
-            "Cost_of_Living": row[4],
-            "Housing_Cost_Percentage": row[5],
-            "Housing_Cost": row[6],
-            "Tax_Rate": row[7],
-            "Savings_Percentage": row[8],
-            "Savings": row[9],
-            "Healthcare_Cost_Percentage": row[10],
-            "Healthcare_Cost": row[11],
-            "Education_Cost_Percentage": row[12],
-            "Education_Cost": row[13],
-            "Transportation_Cost_Percentage": row[14],
-            "Transportation_Cost": row[15],
-            "Sum_Percentage": row[16],
-            "Sum": row[17],
-            "Sum_Costs": row[18],
-            "Region": row[19]
-        }
-        for row in data
-    ]
-
-
-# OUTDATED
 @router.get("/all-information-for-region")
 async def get_all_data_for_region(session: AsyncSession = Depends(get_db)) -> List[dict]:
     """
@@ -462,6 +393,60 @@ async def financial_development_region(
     ]
 
 # -------------------------------------
+
+
+@router.get("/country-information", response_model=List[dict])
+async def get_country_data(
+    country: str,
+    start_year: int = None,
+    session: AsyncSession = Depends(get_db)
+):
+    """
+        Endpoint um alle relevanten Daten für ein bestimmtes Land abzufragen
+
+    :param country: Das Land für das die Daten abgefragt werden sollen
+    :returns: Das ergebnis der Abfrage
+    """
+
+    where = (CostOfLivingAndIncome.Country == country)
+    if start_year:
+        where &= (CostOfLivingAndIncome.Year >= start_year)
+
+    query = select(
+        CostOfLivingAndIncome.Country,
+        CostOfLivingAndIncome.Year,
+        CostOfLivingAndIncome.Average_Monthly_Income,
+        CostOfLivingAndIncome.Net_Income,
+        CostOfLivingAndIncome.Housing_Cost,
+        CostOfLivingAndIncome.Healthcare_Cost,
+        CostOfLivingAndIncome.Education_Cost,
+        CostOfLivingAndIncome.Transportation_Cost,
+        CostOfLivingAndIncome.Region,
+        CostOfLivingAndIncome.Savings
+    ).where(where)
+
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(
+            status_code=404, detail=f"No data found for country: {country}")
+
+    return [
+        {
+            "Country": row[0],
+            "Year": row[1],
+            "Average_Monthly_Income": row[2],
+            "Net_Income": row[3],
+            "Housing_Cost": row[4],
+            "Healthcare_Cost": row[5],
+            "Education_Cost": row[6],
+            "Transportation_Cost": row[7],
+            "Region": row[8],
+            "Savings": row[9]
+        }
+        for row in data
+    ]
 
 
 @router.get("/regions", response_model=List[str])
