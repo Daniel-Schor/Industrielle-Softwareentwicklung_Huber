@@ -55,7 +55,7 @@ region_data = fetch_region_data()
 df_region = convert_to_dataframe(region_data)
 
 y_axis_options = [
-    "Average_Monthly_Income", "Net_Income", "Cost_of_Living",
+    "Average_Monthly_Income", "Net_Income", 
     "Housing_Cost", "Tax_Rate", "Savings",
     "Healthcare_Cost",  "Education_Cost",
     "Transportation_Cost","Sum"
@@ -111,7 +111,6 @@ if not df_country.empty:
 # Costs over Time
 fig_costs = go.Figure()
 if not df_country.empty:
-    fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Cost_of_Living"], mode='lines', name="Cost of Living"))
     fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Housing_Cost"], mode='lines', name="Housing Cost"))
     fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Healthcare_Cost"], mode='lines', name="Healthcare Cost"))
     fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Education_Cost"], mode='lines', name="Education Cost"))
