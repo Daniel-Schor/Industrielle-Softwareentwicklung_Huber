@@ -118,6 +118,7 @@ if not df_country.empty:
         col1, col2 = st.columns([1, 1])
         with col1:
             st.plotly_chart(fig_country)
+            st.plotly_chart(fig_pie)            
         with col2:
             st.plotly_chart(fig_region)
-            st.plotly_chart(fig_pie)
+
