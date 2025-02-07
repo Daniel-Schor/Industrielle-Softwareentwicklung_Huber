@@ -3,12 +3,15 @@ import requests
 import plotly.graph_objects as go
 import pandas as pd
 
+country_options = [
+    'Australia', 'Brazil', 'Canada', 'China', 'France', 'Germany', 'India', 'Japan', 'Mexico', 'Russia', 'South Africa', 'United States'
+]
+
 @st.cache_data
-def fetch_recommendation_data(country: str) -> dict:
+def fetch_recommendation_data(extra_country: str) -> dict:
     healthcare_multiplicator = 1
     education_multiplicator = 1
     income_multiplicator = 1
-    extra_country = "Germany"
     start_year = 2021
 
     url = f"http://localhost:8000/recommended-countries?healthcare_multiplicator={healthcare_multiplicator}&education_multiplicator={education_multiplicator}&income_multiplicator={income_multiplicator}&extra_country={extra_country}&start_year={start_year}"
@@ -124,7 +127,8 @@ def create_stacked_bar_chart(data):
     st.plotly_chart(fig)
 
 
-country = st.sidebar.text_input("Enter Country", "Japan")
-data = fetch_recommendation_data(country)
+st.title("Stacked Bar Chart Visualization")
+extra_country = st.sidebar.selectbox("Select Extra Country", country_options, index=country_options.index("Germany"))
+data = fetch_recommendation_data(extra_country)
 if data:
     create_stacked_bar_chart(data)
