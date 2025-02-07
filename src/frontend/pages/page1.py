@@ -80,7 +80,8 @@ def create_stacked_bar_chart(data):
                         y=year_data['Housing_Cost'],
                         name='Housing Cost',
                         marker=dict(color='blue'),
-                        width=width
+                        width=width,
+                        hovertemplate=f"<span style='color:blue;'>Housing Cost</span><br>{year_data['Housing_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                     fig.add_trace(go.Bar(
@@ -89,7 +90,8 @@ def create_stacked_bar_chart(data):
                         name='Healthcare Cost',
                         marker=dict(color='green'),
                         base=year_data['Housing_Cost'],
-                        width=width
+                        width=width,
+                        hovertemplate=f"<span style='color:green;'>Housing Cost</span><br>{year_data['Healthcare_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                     fig.add_trace(go.Bar(
@@ -99,7 +101,8 @@ def create_stacked_bar_chart(data):
                         marker=dict(color='orange'),
                         base=year_data['Housing_Cost'] +
                         year_data['Healthcare_Cost'],
-                        width=width
+                        width=width,
+                        hovertemplate=f"<span style='color:orange;'>Healthcare Cost</span><br>{year_data['Education_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                     fig.add_trace(go.Bar(
@@ -110,7 +113,8 @@ def create_stacked_bar_chart(data):
                         base=year_data['Housing_Cost'] +
                         year_data['Healthcare_Cost'] +
                         year_data['Education_Cost'],
-                        width=width
+                        width=width,
+                        hovertemplate=f"<span style='color:red;'>Education Cost</span><br>{year_data['Transportation_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
                 elif category == 'Income':
                     fig.add_trace(go.Bar(
@@ -118,7 +122,8 @@ def create_stacked_bar_chart(data):
                         y=year_data['Average_Monthly_Income'],
                         name='Average Monthly Income',
                         marker=dict(color='purple'),
-                        width=width
+                        width=width,
+                        hovertemplate=f"<span style='color:purple;'>Average Monthly Income</span><br>{year_data['Average_Monthly_Income'].values[0]:.2f}</span><extra></extra>"
                     ))
                 else:  # Net Income
                     fig.add_trace(go.Bar(
@@ -126,7 +131,8 @@ def create_stacked_bar_chart(data):
                         y=year_data['Net_Income'],
                         name='Net Income',
                         marker=dict(color='cyan'),
-                        width=width
+                        width=width,
+                        hovertemplate=f"<span style='color:cyan;'>Net Income</span><br>{year_data['Net_Income'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                 # Abstand zwischen Balken derselben Gruppe
