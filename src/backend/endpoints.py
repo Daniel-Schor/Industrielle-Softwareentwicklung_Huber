@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import create_engine, Column, Integer, String, Float, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.future import select
+from sqlalchemy.sql import select, distinct
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from typing import List
 
@@ -461,8 +461,50 @@ async def financial_development_region(
         for row in data
     ]
 
-
 # -------------------------------------
+
+
+@router.get("/regions", response_model=List[str])
+async def get_regions(
+    session: AsyncSession = Depends(get_db)
+) -> List[str]:
+    """
+
+    :return: 
+    """
+
+    query = select(distinct(CostOfLivingAndIncome.Region))
+
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(
+            status_code=404, detail="No data found.")
+
+    return [row[0] for row in data]
+
+
+@router.get("/countries", response_model=List[str])
+async def get_countries(
+    session: AsyncSession = Depends(get_db)
+) -> List[str]:
+    """
+
+    :return: 
+    """
+
+    query = select(distinct(CostOfLivingAndIncome.Country))
+
+    result = await session.execute(query)
+    data = result.fetchall()
+
+    if not data:
+        raise HTTPException(
+            status_code=404, detail="No data found.")
+
+    return [row[0] for row in data]
+
 
 @router.get("/recommended-countries", response_model=List[dict])
 async def recommended_countries(
@@ -483,20 +525,6 @@ async def recommended_countries(
         - healthcare_multiplicator
         - education_multiplicator
         - income_multiplicator
-
-        Länder:
-        - Australia
-        - Brazil
-        - Canada
-        - China
-        - France
-        - Germany
-        - India
-        - Japan
-        - Mexico
-        - Russia
-        - South Africa
-        - United States
 
         Regionen:
         - Africa

@@ -3,21 +3,47 @@ import requests
 import plotly.graph_objects as go
 import pandas as pd
 
-country_options = [
-    'Australia', 'Brazil', 'Canada', 'China', 'France', 'Germany', 'India', 'Japan', 'Mexico', 'Russia', 'South Africa', 'United States'
-]
 
 @st.cache_data
-def fetch_recommendation_data(extra_country: str, healthcare_multiplicator: int, education_multiplicator: int, income_multiplicator: int) -> dict:
+def fetch_recommendation_data(extra_country: str, healthcare_multiplicator: int, education_multiplicator: int, income_multiplicator: int, region: str) -> dict:
     start_year = 2021
 
-    url = f"http://localhost:8000/recommended-countries?healthcare_multiplicator={healthcare_multiplicator}&education_multiplicator={education_multiplicator}&income_multiplicator={income_multiplicator}&extra_country={extra_country}&start_year={start_year}"
+    url = f"http://localhost:8000/recommended-countries?healthcare_multiplicator={healthcare_multiplicator}&education_multiplicator={education_multiplicator}&income_multiplicator={income_multiplicator}&start_year={start_year}"
+    if extra_country:
+        url += f"&extra_country={extra_country}"
+    if region:
+        url += f"&region={region}"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
     else:
         st.error("Error fetching country details")
         return {}
+
+
+@st.cache_data
+def fetch_countries() -> list:
+
+    url = f"http://localhost:8000/countries"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        st.error("Error fetching country details")
+        return {}
+
+
+@st.cache_data
+def fetch_regions() -> list:
+
+    url = f"http://localhost:8000/regions"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        st.error("Error fetching region details")
+        return {}
+
 
 def create_stacked_bar_chart(data):
     df = pd.DataFrame(data)
@@ -71,7 +97,8 @@ def create_stacked_bar_chart(data):
                         y=year_data['Education_Cost'],
                         name='Education Cost',
                         marker=dict(color='orange'),
-                        base=year_data['Housing_Cost'] + year_data['Healthcare_Cost'],
+                        base=year_data['Housing_Cost'] +
+                        year_data['Healthcare_Cost'],
                         width=width
                     ))
 
@@ -80,7 +107,9 @@ def create_stacked_bar_chart(data):
                         y=year_data['Transportation_Cost'],
                         name='Transportation Cost',
                         marker=dict(color='red'),
-                        base=year_data['Housing_Cost'] + year_data['Healthcare_Cost'] + year_data['Education_Cost'],
+                        base=year_data['Housing_Cost'] +
+                        year_data['Healthcare_Cost'] +
+                        year_data['Education_Cost'],
                         width=width
                     ))
                 elif category == 'Income':
@@ -123,15 +152,24 @@ def create_stacked_bar_chart(data):
 
     st.plotly_chart(fig)
 
-extra_country = st.sidebar.selectbox("Select Extra Country", country_options, index=country_options.index("Germany"))
-healthcare_multiplicator = st.sidebar.number_input("Healthcare Multiplicator", min_value=0, value=1, step=1)
-education_multiplicator = st.sidebar.number_input("Education Multiplicator", min_value=0, value=1, step=1)
-income_multiplicator = st.sidebar.number_input("Income Multiplicator", min_value=0, value=1, step=1)
+
+healthcare_multiplicator = st.sidebar.number_input(
+    "Healthcare Multiplicator", min_value=0, value=1, step=1)
+education_multiplicator = st.sidebar.number_input(
+    "Education Multiplicator", min_value=0, value=1, step=1)
+income_multiplicator = st.sidebar.number_input(
+    "Income Multiplicator", min_value=0, value=1, step=1)
+extra_country = st.sidebar.selectbox(
+    "Select Extra Country", [None] + fetch_countries(), index=0)
+region = st.sidebar.selectbox(
+    "Select Desired Region", [None] + fetch_regions(), index=0)
 
 # Validierung der Eingabe
 if education_multiplicator > healthcare_multiplicator or income_multiplicator > healthcare_multiplicator:
-    st.warning("Education and Income Multiplicator must be smaller or equal to Healthcare Multiplicator")
+    st.warning(
+        "Education and Income Multiplicator must be smaller or equal to Healthcare Multiplicator")
 else:
-    data = fetch_recommendation_data(extra_country, healthcare_multiplicator, education_multiplicator, income_multiplicator)
+    data = fetch_recommendation_data(
+        extra_country, healthcare_multiplicator, education_multiplicator, income_multiplicator, region)
     if data:
         create_stacked_bar_chart(data)
