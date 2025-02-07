@@ -154,15 +154,23 @@ def create_stacked_bar_chart(data):
 
 
 healthcare_multiplicator = st.sidebar.number_input(
-    "Healthcare Multiplicator", min_value=0, value=1, step=1)
+    "People", min_value=0.0, value=1.0, step=1.0,
+    format="%.0f",
+    help="Number of people in the household.")
 education_multiplicator = st.sidebar.number_input(
-    "Education Multiplicator", min_value=0, value=1, step=1)
+    "Students", min_value=0.0, max_value=healthcare_multiplicator, value=1.0, step=1.0,
+    format="%.0f",
+    help="Number of students in the household. Cannot be higher than the number of people in the household.")
 income_multiplicator = st.sidebar.number_input(
-    "Income Multiplicator", min_value=0, value=1, step=1)
-extra_country = st.sidebar.selectbox(
-    "Select Extra Country", [None] + fetch_countries(), index=0)
+    "Workforce", min_value=0.0, max_value=healthcare_multiplicator, value=1.0, step=0.5,
+    format="%.1f",
+    help="Number of people working in the Houshold (1 = Full time, 0.5 = Half time).")
 region = st.sidebar.selectbox(
-    "Select Desired Region", [None] + fetch_regions(), index=0)
+    "Desired Region", [None] + fetch_regions(), index=0,
+    help="Region of most interest.")
+extra_country = st.sidebar.selectbox(
+    "Comparison Country", [None] + fetch_countries(), index=0,
+    help="Add an extra country for comparison.")
 
 # Validierung der Eingabe
 if education_multiplicator > healthcare_multiplicator or income_multiplicator > healthcare_multiplicator:
