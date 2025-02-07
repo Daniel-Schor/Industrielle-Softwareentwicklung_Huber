@@ -82,19 +82,23 @@ async def get_all_data_for_region(session: AsyncSession = Depends(get_db)) -> Li
     :returns: Das Ergebnis der Abfrage
     """
     query = select(
-        CostOfLivingAndIncome.Region,                       
-        CostOfLivingAndIncome.Year,                        
-        func.avg(CostOfLivingAndIncome.Average_Monthly_Income).label("Average_Monthly_Income"),  
-        func.avg(CostOfLivingAndIncome.Net_Income).label("Net_Income"),                          
-        func.avg(CostOfLivingAndIncome.Cost_of_Living).label("Cost_of_Living"),                
-        func.avg(CostOfLivingAndIncome.Housing_Cost_Percentage).label("Housing_Cost_Percentage"),
-        func.avg(CostOfLivingAndIncome.Housing_Cost).label("Housing_Cost"),                      
-        func.avg(CostOfLivingAndIncome.Savings).label("Savings"),                              
-        func.avg(CostOfLivingAndIncome.Healthcare_Cost).label("Healthcare_Cost"),               
-        func.avg(CostOfLivingAndIncome.Education_Cost).label("Education_Cost"),                  
-        func.avg(CostOfLivingAndIncome.Transportation_Cost).label("Transportation_Cost"),       
-        func.avg(CostOfLivingAndIncome.Sum).label("Sum"),                                        
-        func.avg(CostOfLivingAndIncome.Sum_Costs).label("Sum_Costs")                             
+        CostOfLivingAndIncome.Region,
+        CostOfLivingAndIncome.Year,
+        func.avg(CostOfLivingAndIncome.Average_Monthly_Income).label(
+            "Average_Monthly_Income"),
+        func.avg(CostOfLivingAndIncome.Net_Income).label("Net_Income"),
+        func.avg(CostOfLivingAndIncome.Cost_of_Living).label("Cost_of_Living"),
+        func.avg(CostOfLivingAndIncome.Housing_Cost_Percentage).label(
+            "Housing_Cost_Percentage"),
+        func.avg(CostOfLivingAndIncome.Housing_Cost).label("Housing_Cost"),
+        func.avg(CostOfLivingAndIncome.Savings).label("Savings"),
+        func.avg(CostOfLivingAndIncome.Healthcare_Cost).label(
+            "Healthcare_Cost"),
+        func.avg(CostOfLivingAndIncome.Education_Cost).label("Education_Cost"),
+        func.avg(CostOfLivingAndIncome.Transportation_Cost).label(
+            "Transportation_Cost"),
+        func.avg(CostOfLivingAndIncome.Sum).label("Sum"),
+        func.avg(CostOfLivingAndIncome.Sum_Costs).label("Sum_Costs")
     ).group_by(CostOfLivingAndIncome.Region, CostOfLivingAndIncome.Year)
 
     result = await session.execute(query)
@@ -134,7 +138,8 @@ async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
         CostOfLivingAndIncome.Year,
         CostOfLivingAndIncome.Average_Monthly_Income,
         CostOfLivingAndIncome.Net_Income,
-        CostOfLivingAndIncome.Cost_of_Living,  # Sicherstellen, dass der Alias gesetzt ist
+        # Sicherstellen, dass der Alias gesetzt ist
+        CostOfLivingAndIncome.Cost_of_Living,
         CostOfLivingAndIncome.Housing_Cost_Percentage,
         CostOfLivingAndIncome.Housing_Cost,
         CostOfLivingAndIncome.Tax_Rate,
@@ -164,7 +169,7 @@ async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
             "Year": row[1],
             "Average_Monthly_Income": row[2],
             "Net_Income": row[3],
-            "Cost_of_Living": row[4],  
+            "Cost_of_Living": row[4],
             "Housing_Cost_Percentage": row[5],
             "Housing_Cost": row[6],
             "Tax_Rate": row[7],
@@ -183,7 +188,6 @@ async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
         }
         for row in data
     ]
-
 
 
 @router.get("/country-information", response_model=List[dict])
@@ -380,11 +384,12 @@ async def recommended_countries(
             income_multiplicator
         current_country["Healthcare_Cost"] = current_country["Healthcare_Cost"] * \
             healthcare_multiplicator
+        # Ab 3 Leuten wird Transportation doppelt so teurer
         current_country["Transportation_Cost"] = current_country["Transportation_Cost"] * \
-            (healthcare_multiplicator * 0.5)
-        # Beibehalten?
+            1 + (math.floor(healthcare_multiplicator / 3))
+        # Ab 5 Leuten wird Housing 25% teurer
         current_country["Housing_Cost"] = current_country["Housing_Cost"] * \
-            (math.ceil(int(healthcare_multiplicator / 5)))
+            1 + (math.floor(healthcare_multiplicator / 6) * 0.25)
         current_country["Education_Cost"] = current_country["Education_Cost"] * \
             education_multiplicator
         current_country["Savings"] = current_country["Net_Income"] - current_country["Housing_Cost"] - \

@@ -3,37 +3,7 @@ import requests
 import plotly.graph_objects as go
 import pandas as pd
 
-
-@st.cache_data
-def fetch_region_data() -> dict:
-    """
-        Ruft die Daten für alle Regionen ab
-
-    :return: Die Daten für alle Regionen
-    """
-    response = requests.get('http://localhost:8000/all-information-for-region')
-    if response.status_code == 200:
-        return response.json()
-    else:
-        st.error("Error fetching data.")
-        return {}
-
-
-@st.cache_data
-def fetch_country_data(country: str) -> dict:
-    """
-        Ruft die Daten für das angegebene Land ab
-
-    :param country: Das Land, für das die Daten abgerufen werden sollen
-    :return: Die Daten für das angegebene Land
-    """
-    url = f"http://localhost:8000/country-information/?country={country}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        st.error("Error fetching country details")
-        return {}
+from api_fetcher import fetch_region_data, fetch_country_data
 
 
 def convert_to_dataframe(data: dict) -> pd.DataFrame:
@@ -55,10 +25,10 @@ region_data = fetch_region_data()
 df_region = convert_to_dataframe(region_data)
 
 y_axis_options = [
-    "Average_Monthly_Income", "Net_Income", 
+    "Average_Monthly_Income", "Net_Income",
     "Housing_Cost", "Tax_Rate", "Savings",
     "Healthcare_Cost",  "Education_Cost",
-    "Transportation_Cost","Sum"
+    "Transportation_Cost", "Sum"
 ]
 
 country_options = ["Argentina", "Australia", "Brazil", "Canada", "Chile", "China", "Egypt", "France", "Germany", "India", "Indonesia",
@@ -90,9 +60,12 @@ df_country = convert_to_dataframe(country_data)
 
 fig_country = go.Figure()
 if not df_country.empty:
-    fig_country.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Average_Monthly_Income"], mode='lines', name="Average Monthly Income"))
-    fig_country.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Net_Income"], mode='lines', name="Net Income"))
-    fig_country.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Savings"], mode='lines', name="Savings"))
+    fig_country.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Average_Monthly_Income"], mode='lines', name="Average Monthly Income"))
+    fig_country.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Net_Income"], mode='lines', name="Net Income"))
+    fig_country.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Savings"], mode='lines', name="Savings"))
 
     fig_country.update_layout(
         title=f"Average Monthly Income, Net Income, and Savings by Year for {selected_country}",
@@ -111,11 +84,15 @@ if not df_country.empty:
 # Costs over Time
 fig_costs = go.Figure()
 if not df_country.empty:
-#    fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Cost_of_Living"], mode='lines', name="Cost of Living"))
-    fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Housing_Cost"], mode='lines', name="Housing Cost"))
-    fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Healthcare_Cost"], mode='lines', name="Healthcare Cost"))
-    fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Education_Cost"], mode='lines', name="Education Cost"))
-    fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Transportation_Cost"], mode='lines', name="Transportation Cost"))
+    #    fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Cost_of_Living"], mode='lines', name="Cost of Living"))
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Housing_Cost"], mode='lines', name="Housing Cost"))
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Healthcare_Cost"], mode='lines', name="Healthcare Cost"))
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Education_Cost"], mode='lines', name="Education Cost"))
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Transportation_Cost"], mode='lines', name="Transportation Cost"))
 
     fig_costs.update_layout(
         title=f"Various Costs over Time for {selected_country}",

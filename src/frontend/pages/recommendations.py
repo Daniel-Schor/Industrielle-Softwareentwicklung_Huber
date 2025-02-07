@@ -7,6 +7,8 @@ from api_fetcher import fetch_recommendation_data, fetch_countries, fetch_region
 
 
 def create_stacked_bar_chart(data):
+    # TODO net income und tax in ein bar
+    # TODO anders gliedern: länder auflisten, bezeichnungen vereinfachen, "Recommendations"
     df = pd.DataFrame(data)
     # Sortierung nach Country, Year und Category
     df = df.sort_values(by=['Country', 'Year'])
@@ -124,6 +126,7 @@ def create_stacked_bar_chart(data):
     st.plotly_chart(fig)
 
 
+st.sidebar.title("Demographics")
 healthcare_multiplicator = st.sidebar.number_input(
     "People", min_value=0.0, value=1.0, step=1.0,
     format="%.0f",
@@ -136,12 +139,18 @@ income_multiplicator = st.sidebar.number_input(
     "Workforce", min_value=0.0, max_value=healthcare_multiplicator, value=1.0, step=0.5,
     format="%.1f",
     help="Number of people working in the Houshold (1 = Full time, 0.5 = Half time).")
+
+st.sidebar.title("Preferences")
 region = st.sidebar.selectbox(
     "Desired Region", [None] + fetch_regions(), index=0,
     help="Region of most interest.")
 extra_country = st.sidebar.selectbox(
     "Comparison Country", [None] + fetch_countries(), index=0,
     help="Add an extra country for comparison.")
+years = st.sidebar.number_input(
+    "Years", min_value=1.0, value=3.0, max_value=5.0, step=1.0,
+    format="%.0f",
+    help="Number of Years to look at.")
 
 # Validierung der Eingabe
 if education_multiplicator > healthcare_multiplicator or income_multiplicator > healthcare_multiplicator:
@@ -149,6 +158,6 @@ if education_multiplicator > healthcare_multiplicator or income_multiplicator > 
         "Education and Income Multiplicator must be smaller or equal to Healthcare Multiplicator")
 else:
     data = fetch_recommendation_data(
-        extra_country, healthcare_multiplicator, education_multiplicator, income_multiplicator, region)
+        extra_country, healthcare_multiplicator, education_multiplicator, income_multiplicator, region, 2023 - (years - 1))
     if data:
         create_stacked_bar_chart(data)
