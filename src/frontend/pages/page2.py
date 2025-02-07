@@ -45,7 +45,7 @@ def convert_to_dataframe(data: dict) -> pd.DataFrame:
     """
     if not data:
         return pd.DataFrame()
-    
+
     return pd.DataFrame(data)
 
 
@@ -76,7 +76,7 @@ if not df_region.empty:
                                         y=region_data[selected_y_axis],
                                         mode='lines',
                                         name=region))
-    
+
     fig_region.update_layout(
         title=f"{selected_y_axis} by Year and Region",
         xaxis_title="Year",
@@ -94,31 +94,52 @@ if not df_country.empty:
                                      y=df_country[selected_y_axis],
                                      mode='lines',
                                      name=selected_country))
-    
+
     fig_country.update_layout(
         title=f"{selected_y_axis} by Year for {selected_country}",
         xaxis_title="Year",
-        yaxis_title=selected_y_axis,
+        yaxis_title="Amount ($)",
         template="plotly_dark"
     )
-    
+
     latest_year = df_country["Year"].max()
     latest_year_data = df_country[df_country["Year"] == latest_year]
-    
+
     pie_columns = [
-        "Average_Monthly_Income", "Net_Income", "Cost_of_Living", "Housing_Cost", "Tax_Rate",
-        "Savings", "Healthcare_Cost", "Education_Cost", "Transportation_Cost"
+        "Housing_Cost", "Healthcare_Cost", "Education_Cost", "Transportation_Cost"
     ]
-    
+
+# Costs over Time
+fig_costs = go.Figure()
+if not df_country.empty:
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Cost_of_Living"], mode='lines', name="Cost of Living"))
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Housing_Cost"], mode='lines', name="Housing Cost"))
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Healthcare_Cost"], mode='lines', name="Healthcare Cost"))
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Education_Cost"], mode='lines', name="Education Cost"))
+    fig_costs.add_trace(go.Scatter(
+        x=df_country["Year"], y=df_country["Transportation_Cost"], mode='lines', name="Transportation Cost"))
+
+    fig_costs.update_layout(
+        title=f"Various Costs over Time for {selected_country}",
+        xaxis_title="Year",
+        yaxis_title="Amount ($)",
+        template="plotly_dark"
+    )
+
     if not latest_year_data.empty:
         pie_data = latest_year_data[pie_columns].iloc[0].to_dict()
-        fig_pie = go.Figure(data=[go.Pie(labels=list(pie_data.keys()), values=list(pie_data.values()), hole=0.3)])
-        fig_pie.update_layout(title=f"Distribution for {latest_year} in {selected_country}", template="plotly_dark")
-    
+        fig_pie = go.Figure(data=[go.Pie(labels=list(
+            pie_data.keys()), values=list(pie_data.values()), hole=0.3)])
+        fig_pie.update_layout(
+            title=f"Distribution for {latest_year} in {selected_country}", template="plotly_dark")
+
         col1, col2 = st.columns([1, 1])
         with col1:
             st.plotly_chart(fig_country)
-            st.plotly_chart(fig_pie)            
+            st.plotly_chart(fig_pie)
         with col2:
             st.plotly_chart(fig_region)
-
