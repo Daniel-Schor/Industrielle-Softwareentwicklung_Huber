@@ -47,6 +47,7 @@ def fetch_regions() -> list:
 
 def create_stacked_bar_chart(data):
     df = pd.DataFrame(data)
+    df = df.sort_values(by=['Country', 'Year'])  # Sortierung nach Country, Year und Category
 
     fig = go.Figure()
 
@@ -56,14 +57,14 @@ def create_stacked_bar_chart(data):
     gap_between_groups = 0.6  # größerer Abstand zwischen den Gruppen
     gap_within_group = 0.05   # kleinerer Abstand innerhalb der Gruppen
 
-    colors = ['#984ea3', '#ff7f00', '#ff7f00', '#e41a1c', '#377eb8', '#4daf4a']
+    colors = ['#984ea3', '#ff7f00', '#a65628', '#e41a1c', '#377eb8', '#4daf4a']
 
     position = 0  # Positionstracker für die Balken
     x_labels = []  # Liste für die Beschriftungen der x-Achse
     x_positions = []  # Numerische Positionen für die Balken
 
-    for year in sorted(years):
-        for country in countries:
+    for country in sorted(countries):
+        for year in sorted(years):
             year_data = df[(df['Country'] == country) & (df['Year'] == year)]
             if year_data.empty:
                 continue
@@ -72,7 +73,7 @@ def create_stacked_bar_chart(data):
             categories = ['Costs', 'Income', 'Net Income']
 
             for i, category in enumerate(categories):
-                label = f"{year} - {country} - {category}"
+                label = f"{country} - {year} - {category}"
                 x_labels.append(label)
                 x_positions.append(position)
 
@@ -93,7 +94,7 @@ def create_stacked_bar_chart(data):
                         marker=dict(color=colors[1]),
                         base=year_data['Housing_Cost'],
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[1]};'>Housing Cost</span><br>{year_data['Healthcare_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"<span style='color:{colors[1]};'>Healthcare Cost</span><br>{year_data['Healthcare_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                     fig.add_trace(go.Bar(
@@ -101,10 +102,9 @@ def create_stacked_bar_chart(data):
                         y=year_data['Education_Cost'],
                         name='Education Cost',
                         marker=dict(color=colors[2]),
-                        base=year_data['Housing_Cost'] +
-                        year_data['Healthcare_Cost'],
+                        base=year_data['Housing_Cost'] + year_data['Healthcare_Cost'],
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[2]};'>Healthcare Cost</span><br>{year_data['Education_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"<span style='color:{colors[2]};'>Education Cost</span><br>{year_data['Education_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                     fig.add_trace(go.Bar(
@@ -112,11 +112,9 @@ def create_stacked_bar_chart(data):
                         y=year_data['Transportation_Cost'],
                         name='Transportation Cost',
                         marker=dict(color=colors[3]),
-                        base=year_data['Housing_Cost'] +
-                        year_data['Healthcare_Cost'] +
-                        year_data['Education_Cost'],
+                        base=year_data['Housing_Cost'] + year_data['Healthcare_Cost'] + year_data['Education_Cost'],
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[3]};'>Education Cost</span><br>{year_data['Transportation_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"<span style='color:{colors[3]};'>Transportation Cost</span><br>{year_data['Transportation_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
                 elif category == 'Income':
                     fig.add_trace(go.Bar(
@@ -145,8 +143,8 @@ def create_stacked_bar_chart(data):
 
     fig.update_layout(
         barmode='stack',
-        title='Stacked Bar Chart of Costs, Average Income, and Net Income by Year, Country, and Category',
-        xaxis_title='Year - Country - Category',
+        title='Stacked Bar Chart of Costs, Average Income, and Net Income by Country, Year, and Category',
+        xaxis_title='Country - Year - Category',
         yaxis_title='Amount ($)',
         showlegend=False,  # Legende ausblenden
         height=800,        # Erhöht die Höhe des Diagramms
