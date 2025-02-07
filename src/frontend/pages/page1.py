@@ -8,7 +8,8 @@ from api_fetcher import fetch_recommendation_data, fetch_countries, fetch_region
 
 def create_stacked_bar_chart(data):
     df = pd.DataFrame(data)
-    df = df.sort_values(by=['Country', 'Year'])  # Sortierung nach Country, Year und Category
+    # Sortierung nach Country, Year und Category
+    df = df.sort_values(by=['Country', 'Year'])
 
     fig = go.Figure()
 
@@ -63,7 +64,8 @@ def create_stacked_bar_chart(data):
                         y=year_data['Education_Cost'],
                         name='Education Cost',
                         marker=dict(color=colors[2]),
-                        base=year_data['Housing_Cost'] + year_data['Healthcare_Cost'],
+                        base=year_data['Housing_Cost'] +
+                        year_data['Healthcare_Cost'],
                         width=width,
                         hovertemplate=f"<span style='color:{colors[2]};'>Education Cost</span><br>{year_data['Education_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
@@ -73,7 +75,9 @@ def create_stacked_bar_chart(data):
                         y=year_data['Transportation_Cost'],
                         name='Transportation Cost',
                         marker=dict(color=colors[3]),
-                        base=year_data['Housing_Cost'] + year_data['Healthcare_Cost'] + year_data['Education_Cost'],
+                        base=year_data['Housing_Cost'] +
+                        year_data['Healthcare_Cost'] +
+                        year_data['Education_Cost'],
                         width=width,
                         hovertemplate=f"<span style='color:{colors[3]};'>Transportation Cost</span><br>{year_data['Transportation_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
