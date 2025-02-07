@@ -56,6 +56,8 @@ def create_stacked_bar_chart(data):
     gap_between_groups = 0.6  # größerer Abstand zwischen den Gruppen
     gap_within_group = 0.05   # kleinerer Abstand innerhalb der Gruppen
 
+    colors = ['#984ea3', '#ff7f00', '#ff7f00', '#e41a1c', '#377eb8', '#4daf4a']
+
     position = 0  # Positionstracker für die Balken
     x_labels = []  # Liste für die Beschriftungen der x-Achse
     x_positions = []  # Numerische Positionen für die Balken
@@ -79,7 +81,7 @@ def create_stacked_bar_chart(data):
                         x=[position],
                         y=year_data['Housing_Cost'],
                         name='Housing Cost',
-                        marker=dict(color='blue'),
+                        marker=dict(color=colors[0]),
                         width=width
                     ))
 
@@ -87,7 +89,7 @@ def create_stacked_bar_chart(data):
                         x=[position],
                         y=year_data['Healthcare_Cost'],
                         name='Healthcare Cost',
-                        marker=dict(color='green'),
+                        marker=dict(color=colors[1]),
                         base=year_data['Housing_Cost'],
                         width=width
                     ))
@@ -96,7 +98,7 @@ def create_stacked_bar_chart(data):
                         x=[position],
                         y=year_data['Education_Cost'],
                         name='Education Cost',
-                        marker=dict(color='orange'),
+                        marker=dict(color=colors[2]),
                         base=year_data['Housing_Cost'] +
                         year_data['Healthcare_Cost'],
                         width=width
@@ -106,7 +108,7 @@ def create_stacked_bar_chart(data):
                         x=[position],
                         y=year_data['Transportation_Cost'],
                         name='Transportation Cost',
-                        marker=dict(color='red'),
+                        marker=dict(color=colors[3]),
                         base=year_data['Housing_Cost'] +
                         year_data['Healthcare_Cost'] +
                         year_data['Education_Cost'],
@@ -117,7 +119,7 @@ def create_stacked_bar_chart(data):
                         x=[position],
                         y=year_data['Average_Monthly_Income'],
                         name='Average Monthly Income',
-                        marker=dict(color='purple'),
+                        marker=dict(color=colors[4]),
                         width=width
                     ))
                 else:  # Net Income
@@ -125,7 +127,7 @@ def create_stacked_bar_chart(data):
                         x=[position],
                         y=year_data['Net_Income'],
                         name='Net Income',
-                        marker=dict(color='cyan'),
+                        marker=dict(color=colors[5]),
                         width=width
                     ))
 
