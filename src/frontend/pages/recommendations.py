@@ -26,6 +26,8 @@ def create_stacked_bar_chart(data):
     x_labels = []  # Liste für die Beschriftungen der x-Achse
     x_positions = []  # Numerische Positionen für die Balken
 
+    country_names = get_country_name_list(data)
+
     for country in sorted(countries):
         for year in sorted(years):
             year_data = df[(df['Country'] == country) & (df['Year'] == year)]
@@ -33,10 +35,10 @@ def create_stacked_bar_chart(data):
                 continue
 
             # Balken in 3er-Gruppen (Costs, Income, Net Income)
-            categories = ['Costs', 'Income', 'Net Income']
+            categories = ['Costs', 'Income']
 
             for i, category in enumerate(categories):
-                label = f"{country} - {year} - {category}"
+                label = f"{country_names.index(country) + 1} - {year}"
                 x_labels.append(label)
                 x_positions.append(position)
 
@@ -82,23 +84,28 @@ def create_stacked_bar_chart(data):
                         width=width,
                         hovertemplate=f"<span style='color:{colors[3]};'>Transportation Cost</span><br>{year_data['Transportation_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
-                elif category == 'Income':
-                    fig.add_trace(go.Bar(
-                        x=[position],
-                        y=year_data['Average_Monthly_Income'],
-                        name='Average Monthly Income',
-                        marker=dict(color=colors[4]),
-                        width=width,
-                        hovertemplate=f"<span style='color:{colors[4]};'>Average Monthly Income</span><br>{year_data['Average_Monthly_Income'].values[0]:.2f}</span><extra></extra>"
-                    ))
-                else:  # Net Income
+                else:
                     fig.add_trace(go.Bar(
                         x=[position],
                         y=year_data['Net_Income'],
                         name='Net Income',
+                        marker=dict(color=colors[4]),
+                        width=width,
+                        hovertemplate=f"<span style='color:{colors[4]};'>Net Income</span><br>{year_data['Net_Income'].values[0]:.2f}</span><extra></extra>"
+                    ))
+
+                    fig.add_trace(go.Bar(
+                        x=[position],
+                        y=year_data['Average_Monthly_Income'] -
+                        year_data['Net_Income'],
+                        name='Average Monthly Income',
                         marker=dict(color=colors[5]),
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[5]};'>Net Income</span><br>{year_data['Net_Income'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"""<span style='color:{colors[5]};'>Average Monthly Income</span>
+                            <br>{year_data['Average_Monthly_Income'].values[0]:.2f}<br>
+                            <br><span style='color:{colors[5]};'>Tax</span>
+                            <br>{(year_data['Average_Monthly_Income']-year_data['Net_Income']).values[0]:.2f}</span><extra></extra>
+                        """
                     ))
 
                 # Abstand zwischen Balken derselben Gruppe
@@ -110,8 +117,8 @@ def create_stacked_bar_chart(data):
     fig.update_layout(
         barmode='stack',
         title='Stacked Bar Chart of Costs, Average Income, and Net Income by Country, Year, and Category',
-        xaxis_title='Country - Year - Category',
-        yaxis_title='Amount ($)',
+        xaxis_title='Country - Year',
+        yaxis_title='Amount in $',
         showlegend=False,  # Legende ausblenden
         height=800,        # Erhöht die Höhe des Diagramms
         width=1200,        # Erweitert die Breite des Diagramms
@@ -151,6 +158,29 @@ years = st.sidebar.number_input(
     format="%.0f",
     help="Number of Years to look at.")
 
+
+def get_country_name_list(
+        data: dict
+) -> list:
+    """
+        _summary_
+
+    :param data: _description_
+
+    :return: _description_
+    """
+
+    countries = []
+
+    for row in data:
+        if row["Country"] not in countries:
+            countries.append(row["Country"])
+
+    return countries
+
+
+st.title("Recommendations")
+
 # Validierung der Eingabe
 if education_multiplicator > healthcare_multiplicator or income_multiplicator > healthcare_multiplicator:
     st.warning(
@@ -159,4 +189,22 @@ else:
     data = fetch_recommendation_data(
         extra_country, healthcare_multiplicator, education_multiplicator, income_multiplicator, region, 2023 - (years - 1))
     if data:
-        create_stacked_bar_chart(data)
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+            create_stacked_bar_chart(data)
+
+        with col2:
+            st.markdown("### Legend")
+            st.text(
+                "List of recommended countries based on your preferences and demografic data."
+            )
+
+            recommendations = "\n".join(
+                [f"{i + 1}. {country}" for i, country in enumerate(get_country_name_list(data))])
+
+            st.markdown(recommendations)
+
+            # TODO Color legend
+            st.info(
+                "INFO")

@@ -17,6 +17,8 @@ country_data = fetch_country_data(selected_country)
 df_country = convert_to_dataframe(country_data)
 unique_years = sorted(df_country["Year"].unique())
 
+st.title(f"Analysis for {selected_country}")
+
 fig_country = go.Figure()
 if not df_country.empty:
     fig_country.add_trace(go.Scatter(
