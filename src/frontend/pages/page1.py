@@ -8,6 +8,8 @@ from api_fetcher import fetch_recommendation_data, fetch_countries, fetch_region
 
 def create_stacked_bar_chart(data):
     df = pd.DataFrame(data)
+    # Sortierung nach Country, Year und Category
+    df = df.sort_values(by=['Country', 'Year'])
 
     fig = go.Figure()
 
@@ -17,14 +19,14 @@ def create_stacked_bar_chart(data):
     gap_between_groups = 0.6  # größerer Abstand zwischen den Gruppen
     gap_within_group = 0.05   # kleinerer Abstand innerhalb der Gruppen
 
-    colors = ['orange', 'blue', 'green', '#e41a1c', '#377eb8', '#4daf4a']
+    colors = ['#984ea3', '#ff7f00', '#a65628', '#e41a1c', '#377eb8', '#4daf4a']
 
     position = 0  # Positionstracker für die Balken
     x_labels = []  # Liste für die Beschriftungen der x-Achse
     x_positions = []  # Numerische Positionen für die Balken
 
-    for year in sorted(years):
-        for country in countries:
+    for country in sorted(countries):
+        for year in sorted(years):
             year_data = df[(df['Country'] == country) & (df['Year'] == year)]
             if year_data.empty:
                 continue
@@ -33,7 +35,7 @@ def create_stacked_bar_chart(data):
             categories = ['Costs', 'Income', 'Net Income']
 
             for i, category in enumerate(categories):
-                label = f"{year} - {country} - {category}"
+                label = f"{country} - {year} - {category}"
                 x_labels.append(label)
                 x_positions.append(position)
 
@@ -106,8 +108,8 @@ def create_stacked_bar_chart(data):
 
     fig.update_layout(
         barmode='stack',
-        title='Stacked Bar Chart of Costs, Average Income, and Net Income by Year, Country, and Category',
-        xaxis_title='Year - Country - Category',
+        title='Stacked Bar Chart of Costs, Average Income, and Net Income by Country, Year, and Category',
+        xaxis_title='Country - Year - Category',
         yaxis_title='Amount ($)',
         showlegend=False,  # Legende ausblenden
         height=800,        # Erhöht die Höhe des Diagramms
