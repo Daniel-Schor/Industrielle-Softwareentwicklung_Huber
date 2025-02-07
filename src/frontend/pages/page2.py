@@ -97,7 +97,7 @@ if not df_country.empty:
     fig_country.update_layout(
         title=f"Average Monthly Income, Net Income, and Savings by Year for {selected_country}",
         xaxis_title="Year",
-        yaxis_title="$",
+        yaxis_title="Amount ($)",
         template="plotly_dark"
     )
 
@@ -120,7 +120,7 @@ if not df_country.empty:
     fig_costs.update_layout(
         title=f"Various Costs over Time for {selected_country}",
         xaxis_title="Year",
-        yaxis_title="$",
+        yaxis_title="Amount ($)",
         template="plotly_dark"
     )
 
