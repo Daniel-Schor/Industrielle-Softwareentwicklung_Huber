@@ -1,22 +1,7 @@
 import streamlit as st
-import requests
 import plotly.graph_objects as go
-import pandas as pd
 
-from api_fetcher import fetch_region_data, fetch_country_data
-
-
-def convert_to_dataframe(data: dict) -> pd.DataFrame:
-    """
-        Konvertiert Daten in ein DataFrame
-
-    :param data: Die Daten, die in ein DataFrame konvertiert werden sollen
-    :return: Ein DataFrame mit den konvertierten Daten
-    """
-    if not data:
-        return pd.DataFrame()
-
-    return pd.DataFrame(data)
+from api_fetcher import fetch_region_data, fetch_country_data, fetch_countries, convert_to_dataframe
 
 
 # Fetch region data
@@ -24,39 +9,13 @@ region_data = fetch_region_data()
 
 df_region = convert_to_dataframe(region_data)
 
-y_axis_options = [
-    "Average_Monthly_Income", "Net_Income",
-    "Housing_Cost", "Tax_Rate", "Savings",
-    "Healthcare_Cost",  "Education_Cost",
-    "Transportation_Cost", "Sum"
-]
-
-country_options = ["Argentina", "Australia", "Brazil", "Canada", "Chile", "China", "Egypt", "France", "Germany", "India", "Indonesia",
-                   "Italy", "Japan", "Mexico", "New Zealand", "Nigeria", "Russia", "South Africa", "South Korea", "Spain", "United Kingdom", "United States"]
+country_options = fetch_countries()
 
 selected_country = st.sidebar.selectbox("Country", country_options)
-selected_y_axis = st.sidebar.selectbox("y-axis for region", y_axis_options)
-
-fig_region = go.Figure()
-if not df_region.empty:
-    regions = df_region["Region"].unique()
-    for region in regions:
-        region_data = df_region[df_region["Region"] == region]
-        fig_region.add_trace(go.Scatter(x=region_data["Year"],
-                                        y=region_data[selected_y_axis],
-                                        mode='lines',
-                                        name=region))
-
-    fig_region.update_layout(
-        title=f"{selected_y_axis} by Year and Region",
-        xaxis_title="Year",
-        yaxis_title=selected_y_axis,
-        template="plotly_dark"
-    )
-
 
 country_data = fetch_country_data(selected_country)
 df_country = convert_to_dataframe(country_data)
+unique_years = sorted(df_country["Year"].unique())
 
 fig_country = go.Figure()
 if not df_country.empty:
@@ -71,7 +30,12 @@ if not df_country.empty:
         title=f"Average Monthly Income, Net Income, and Savings by Year for {selected_country}",
         xaxis_title="Year",
         yaxis_title="Amount ($)",
-        template="plotly_dark"
+        template="plotly_dark",
+        xaxis=dict(
+            tickmode='array',
+            tickvals=unique_years,
+            tickformat=".0f"
+        )
     )
 
     latest_year = df_country["Year"].max()
@@ -98,7 +62,12 @@ if not df_country.empty:
         title=f"Various Costs over Time for {selected_country}",
         xaxis_title="Year",
         yaxis_title="Amount ($)",
-        template="plotly_dark"
+        template="plotly_dark",
+        xaxis=dict(
+            tickmode='array',
+            tickvals=unique_years,
+            tickformat=".0f"
+        )
     )
 
     if not latest_year_data.empty:
@@ -108,10 +77,9 @@ if not df_country.empty:
         fig_pie.update_layout(
             title=f"Distribution for {latest_year} in {selected_country}", template="plotly_dark")
 
-        col1, col2 = st.columns([1, 1])
+        col1, col2 = st.columns([1, 0.5])
         with col1:
             st.plotly_chart(fig_country)
-            st.plotly_chart(fig_pie)
-        with col2:
             st.plotly_chart(fig_costs)
-            st.plotly_chart(fig_region)
+        with col2:
+            st.plotly_chart(fig_pie)

@@ -1,3 +1,4 @@
+import pandas as pd
 import requests
 import streamlit as st
 
@@ -71,3 +72,16 @@ def fetch_country_data(country: str) -> dict:
     else:
         st.error("Error fetching country details")
         return {}
+
+
+def convert_to_dataframe(data: dict) -> pd.DataFrame:
+    """
+        Konvertiert Daten in ein DataFrame
+
+    :param data: Die Daten, die in ein DataFrame konvertiert werden sollen
+    :return: Ein DataFrame mit den konvertierten Daten
+    """
+    if not data:
+        return pd.DataFrame()
+
+    return pd.DataFrame(data)
