@@ -8,20 +8,15 @@ region_data = fetch_region_data()
 
 df_region = convert_to_dataframe(region_data)
 
-options = {
-    "Average Monthly Income": "Average_Monthly_Income",
-    "Net Income": "Net_Income",
-    "Housing Cost": "Housing_Cost",
-    "Tax Rate": "Tax_Rate",
-    "Savings": "Savings",
-    "Healthcare Cost": "Healthcare_Cost",
-    "Education Cost": "Education_Cost",
-    "Transportation Cost": "Transportation_Cost",
-    "Sum": "Sum"
-}
-selected_y_axis = st.sidebar.selectbox("y-axis for region", options.keys())
+numerical_columns = [
+    col for col in df_region.select_dtypes(include=["number"]).columns if col != "Year"
+]
 
-# TODO
+options = {col.replace("_", " ").title(): col for col in numerical_columns}
+
+selected_y_axis = st.sidebar.selectbox("Metric Selection", options.keys())
+
+# TODO finish header
 st.title("Problemstatement")
 st.text("""
         Menschen, die einen mittel- bis langfristigen Aufenthalt im Ausland planen für z.B. Work and Travel, ein Studium oder für eine Auswanderung, haben das Problem, realistische Kosten- und Einkommensprognosen für ihr Zielland zu erstellen. Wichtige Informationen zu den Lebenshaltungskosten, Wohnkosten, Gesundheitsausgaben, Bildungskosten, Transportkosten sowie den dazugehörigen durchschnittlichen Einkommensverhältnissen und Steuersätzen sind oft unübersichtlich, intransparent oder schwer zu vergleichen. Basierend auf genannten Daten aus über 10 Ländern soll unser Tool mit individuellen Angaben des Verbrauchers aufzeigen, welche Länder für den möglichen Abschnittswechel die besten Voraussetzungen bieten.
@@ -56,7 +51,7 @@ if not df_region.empty:
 
 st.plotly_chart(fig_region)
 
-# TODO
+# TODO finish footer
 st.markdown(
     """
         <p style='text-align: center; color: gray; font-size: 0.8em;'>
