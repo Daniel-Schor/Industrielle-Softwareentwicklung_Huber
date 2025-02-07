@@ -3,31 +3,15 @@ import requests
 import plotly.graph_objects as go
 import pandas as pd
 
-
 @st.cache_data
-def fetch_region_data() -> dict:
-    """
-        Ruft die Daten für alle Regionen ab
+def fetch_recommendation_data(country: str) -> dict:
+    healthcare_multiplicator = 1
+    education_multiplicator = 1
+    income_multiplicator = 1
+    extra_country = "Germany"
+    start_year = 2021
 
-    :return: Die Daten für alle Regionen
-    """
-    response = requests.get('http://localhost:8000/all-information-for-region')
-    if response.status_code == 200:
-        return response.json()
-    else:
-        st.error("Error fetching data.")
-        return {}
-
-
-@st.cache_data
-def fetch_country_data(country: str) -> dict:
-    """
-        Ruft die Daten für das angegebene Land ab
-
-    :param country: Das Land, für das die Daten abgerufen werden sollen
-    :return: Die Daten für das angegebene Land
-    """
-    url = f"http://localhost:8000/country-information/?country={country}"
+    url = f"http://localhost:8000/recommended-countries?healthcare_multiplicator={healthcare_multiplicator}&education_multiplicator={education_multiplicator}&income_multiplicator={income_multiplicator}&extra_country={extra_country}&start_year={start_year}"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
@@ -35,89 +19,112 @@ def fetch_country_data(country: str) -> dict:
         st.error("Error fetching country details")
         return {}
 
+def create_stacked_bar_chart(data):
+    df = pd.DataFrame(data)
 
-def convert_to_dataframe(data: dict) -> pd.DataFrame:
-    """
-        Konvertiert Daten in ein DataFrame
+    fig = go.Figure()
 
-    :param data: Die Daten, die in ein DataFrame konvertiert werden sollen
-    :return: Ein DataFrame mit den konvertierten Daten
-    """
-    if not data:
-        return pd.DataFrame()
-    
-    return pd.DataFrame(data)
+    countries = df['Country'].unique()
+    years = df['Year'].unique()
+    width = 0.2  # schmalere Balken für bessere Übersicht
+    gap_between_groups = 0.6  # größerer Abstand zwischen den Gruppen
+    gap_within_group = 0.05   # kleinerer Abstand innerhalb der Gruppen
 
+    position = 0  # Positionstracker für die Balken
+    x_labels = []  # Liste für die Beschriftungen der x-Achse
+    x_positions = []  # Numerische Positionen für die Balken
 
-# Fetch region data
-region_data = fetch_region_data()
+    for year in sorted(years):
+        for country in countries:
+            year_data = df[(df['Country'] == country) & (df['Year'] == year)]
+            if year_data.empty:
+                continue
 
-df_region = convert_to_dataframe(region_data)
+            # Balken in 3er-Gruppen (Costs, Income, Net Income)
+            categories = ['Costs', 'Income', 'Net Income']
 
-y_axis_options = [
-    "Average_Monthly_Income", "Net_Income", "Cost_of_Living", "Housing_Cost_Percentage",
-    "Housing_Cost", "Tax_Rate", "Savings_Percentage", "Savings", "Healthcare_Cost_Percentage",
-    "Healthcare_Cost", "Education_Cost_Percentage", "Education_Cost", "Transportation_Cost_Percentage",
-    "Transportation_Cost", "Sum_Percentage", "Sum", "Sum_Costs"
-]
+            for i, category in enumerate(categories):
+                label = f"{year} - {country} - {category}"
+                x_labels.append(label)
+                x_positions.append(position)
 
-country_options = [
-    'Australia', 'Brazil', 'Canada', 'China', 'France', 'Germany', 'India', 'Japan', 'Mexico', 'Russia', 'South Africa', 'United States'
-]
+                if category == 'Costs':
+                    fig.add_trace(go.Bar(
+                        x=[position],
+                        y=year_data['Housing_Cost'],
+                        name='Housing Cost',
+                        marker=dict(color='blue'),
+                        width=width
+                    ))
 
-selected_y_axis = st.sidebar.selectbox("Wähle die Y-Achse", y_axis_options)
+                    fig.add_trace(go.Bar(
+                        x=[position],
+                        y=year_data['Healthcare_Cost'],
+                        name='Healthcare Cost',
+                        marker=dict(color='green'),
+                        base=year_data['Housing_Cost'],
+                        width=width
+                    ))
 
-fig_region = go.Figure()
-if not df_region.empty:
-    regions = df_region["Region"].unique()
-    for region in regions:
-        region_data = df_region[df_region["Region"] == region]
-        fig_region.add_trace(go.Scatter(x=region_data["Year"],
-                                        y=region_data[selected_y_axis],
-                                        mode='lines',
-                                        name=region))
-    
-    fig_region.update_layout(
-        title=f"{selected_y_axis} by Year and Region",
-        xaxis_title="Year",
-        yaxis_title=selected_y_axis,
-        template="plotly_dark"
+                    fig.add_trace(go.Bar(
+                        x=[position],
+                        y=year_data['Education_Cost'],
+                        name='Education Cost',
+                        marker=dict(color='orange'),
+                        base=year_data['Housing_Cost'] + year_data['Healthcare_Cost'],
+                        width=width
+                    ))
+
+                    fig.add_trace(go.Bar(
+                        x=[position],
+                        y=year_data['Transportation_Cost'],
+                        name='Transportation Cost',
+                        marker=dict(color='red'),
+                        base=year_data['Housing_Cost'] + year_data['Healthcare_Cost'] + year_data['Education_Cost'],
+                        width=width
+                    ))
+                elif category == 'Income':
+                    fig.add_trace(go.Bar(
+                        x=[position],
+                        y=year_data['Average_Monthly_Income'],
+                        name='Average Monthly Income',
+                        marker=dict(color='purple'),
+                        width=width
+                    ))
+                else:  # Net Income
+                    fig.add_trace(go.Bar(
+                        x=[position],
+                        y=year_data['Net_Income'],
+                        name='Net Income',
+                        marker=dict(color='cyan'),
+                        width=width
+                    ))
+
+                # Abstand zwischen Balken derselben Gruppe
+                position += gap_within_group + width
+
+            # Größerer Abstand nach jeder 3er-Gruppe
+            position += gap_between_groups
+
+    fig.update_layout(
+        barmode='stack',
+        title='Stacked Bar Chart of Costs, Average Income, and Net Income by Year, Country, and Category',
+        xaxis_title='Year - Country - Category',
+        yaxis_title='Amount ($)',
+        showlegend=False,  # Legende ausblenden
+        height=800,        # Erhöht die Höhe des Diagramms
+        width=1200,        # Erweitert die Breite des Diagramms
+        xaxis=dict(
+            tickangle=-90,  # Vertikale Beschriftung
+            tickvals=x_positions,  # Positionen für die Ticks
+            ticktext=x_labels       # Beschriftung der Ticks
+        )
     )
 
-selected_country = st.sidebar.selectbox("Wähle ein Land", country_options)
-country_data = fetch_country_data(selected_country)
-df_country = convert_to_dataframe(country_data)
+    st.plotly_chart(fig)
 
-fig_country = go.Figure()
-if not df_country.empty:
-    fig_country.add_trace(go.Scatter(x=df_country["Year"],
-                                     y=df_country[selected_y_axis],
-                                     mode='lines',
-                                     name=selected_country))
-    
-    fig_country.update_layout(
-        title=f"{selected_y_axis} by Year for {selected_country}",
-        xaxis_title="Year",
-        yaxis_title=selected_y_axis,
-        template="plotly_dark"
-    )
-    
-    latest_year = df_country["Year"].max()
-    latest_year_data = df_country[df_country["Year"] == latest_year]
-    
-    pie_columns = [
-        "Average_Monthly_Income", "Net_Income", "Cost_of_Living", "Housing_Cost", "Tax_Rate",
-        "Savings", "Healthcare_Cost", "Education_Cost", "Transportation_Cost"
-    ]
-    
-    if not latest_year_data.empty:
-        pie_data = latest_year_data[pie_columns].iloc[0].to_dict()
-        fig_pie = go.Figure(data=[go.Pie(labels=list(pie_data.keys()), values=list(pie_data.values()), hole=0.3)])
-        fig_pie.update_layout(title=f"Distribution for {latest_year} in {selected_country}", template="plotly_dark")
-    
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            st.plotly_chart(fig_country)
-        with col2:
-            st.plotly_chart(fig_region)
-            st.plotly_chart(fig_pie)
+
+country = st.sidebar.text_input("Enter Country", "Japan")
+data = fetch_recommendation_data(country)
+if data:
+    create_stacked_bar_chart(data)
