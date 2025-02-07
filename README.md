@@ -50,4 +50,6 @@ WiSe 2024/25
 > **TEILNEHMER:**
 Esrom Johannes, Davide Pedergnana, Daniel Schor, Mavin-Moris Scholl
 
+https://studfrauasde-my.sharepoint.com/:w:/g/personal/uas0021351_stud_fra-uas_de/EWAX0KTq0r5BkuKpy9nOgo8Bo8BAi4kUTt5rwEwdZH8ahQ?e=Qucr5Z
+
 ---

@@ -306,6 +306,8 @@ async def get_all_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
 # -------------------------------------
 
 # OUTDATED
+
+
 def get_disposable_income_query() -> select:
     """
         Query für die Berechnung des verfügbaren Einkommens
@@ -322,6 +324,8 @@ def get_disposable_income_query() -> select:
     return query
 
 # OUTDATED
+
+
 def get_disposable_income_query_REGION() -> select:
     """
         Query für die Berechnung des verfügbaren Einkommens gruppiert nach Regionen
@@ -409,6 +413,8 @@ async def financial_development(
     ]
 
 # OUTDATED
+
+
 @router.get("/financial_development_region", response_model=List[dict])
 async def financial_development_region(
     method: str,
@@ -456,43 +462,77 @@ async def financial_development_region(
     ]
 
 
-
 # -------------------------------------
 
-# TODO replicate with multiple years
 @router.get("/recommended-countries", response_model=List[dict])
 async def recommended_countries(
-    healthcare_multiplicator: int,
-    education_multiplicator: int,
-    income_multiplicator: float,
+    healthcare_multiplicator: int = 1,
+    education_multiplicator: int = 0,
+    income_multiplicator: float = 1,
     extra_country: str = None,
     start_year: int = 2021,
+    region: str = None,
     session: AsyncSession = Depends(get_db)
 ) -> List[dict]:
     """
         Überprüft anhand von verschiedenen Faktoren, 
         bei welchen Ländern für ein Leben im Ausland das meiste Geld vom Einkommen übrig bleibt.
         Ermöglicht ein weiteres Land auszuwählen, um zu sehen, wie es im Vergleich abschneidet.
-        
+
         Faktoren:
         - healthcare_multiplicator
         - education_multiplicator
         - income_multiplicator
 
+        Länder:
+        - Australia
+        - Brazil
+        - Canada
+        - China
+        - France
+        - Germany
+        - India
+        - Japan
+        - Mexico
+        - Russia
+        - South Africa
+        - United States
 
+        Regionen:
+        - Africa
+        - Asia
+        - Europe
+        - North America
+        - Oceania
+        - South America
 
     :param healthcare_multiplicator: XXX
     :param education_multiplicator: XXX
     :param income_multiplicator: XXX
     :param extra_country: XXX
     :param start_year: XXX
+    :param region: XXX
 
     :return: A list of dictionaries containing the data
     """
 
-    if healthcare_multiplicator < 0 or education_multiplicator < 0 or income_multiplicator < 0:
+    if healthcare_multiplicator < 1:
+        raise HTTPException(
+            status_code=400, detail="Healthcare Multiplicator must be greater or equal to 1.")
+    if education_multiplicator < 0 or income_multiplicator < 0:
         raise HTTPException(
             status_code=400, detail="Multiplicators must be greater than 0.")
+    if education_multiplicator > healthcare_multiplicator or income_multiplicator > healthcare_multiplicator:
+        raise HTTPException(
+            status_code=400, detail="Education and Income Multiplicator must be smaller or equal to Healthcare Multiplicator.")
+
+    where = (CostOfLivingAndIncome.Year >= start_year)
+    if region:
+        if extra_country:
+            where &= ((CostOfLivingAndIncome.Region == region) |
+                      (CostOfLivingAndIncome.Country == extra_country))
+        else:
+            where &= (CostOfLivingAndIncome.Region == region)
 
     query = select(
         CostOfLivingAndIncome.Country,
@@ -503,9 +543,9 @@ async def recommended_countries(
         CostOfLivingAndIncome.Healthcare_Cost,
         CostOfLivingAndIncome.Education_Cost,
         CostOfLivingAndIncome.Transportation_Cost,
-        CostOfLivingAndIncome.Year
-    ).where(CostOfLivingAndIncome.Year >= start_year)
-
+        CostOfLivingAndIncome.Year,
+        CostOfLivingAndIncome.Region
+    ).where(where)
 
     result = await session.execute(query)
     data = result.fetchall()
@@ -526,17 +566,25 @@ async def recommended_countries(
             "Healthcare_Cost": row[5],
             "Education_Cost": row[6],
             "Transportation_Cost": row[7],
-            "Year": row[8]
-                  }
+            "Year": row[8],
+            "Region": row[9]
+        }
 
-        current_country["Average_Monthly_Income"] = current_country["Average_Monthly_Income"] * income_multiplicator
-        current_country["Net_Income"] = current_country["Net_Income"] * income_multiplicator
-        current_country["Healthcare_Cost"] = current_country["Healthcare_Cost"] * healthcare_multiplicator
-        current_country["Education_Cost"] = current_country["Education_Cost"] * education_multiplicator
-        current_country["Savings"] = current_country["Net_Income"] - current_country["Housing_Cost"] - current_country["Healthcare_Cost"] - current_country["Education_Cost"] - current_country["Transportation_Cost"]
+        current_country["Average_Monthly_Income"] = current_country["Average_Monthly_Income"] * \
+            income_multiplicator
+        current_country["Net_Income"] = current_country["Net_Income"] * \
+            income_multiplicator
+        current_country["Healthcare_Cost"] = current_country["Healthcare_Cost"] * \
+            healthcare_multiplicator
+        current_country["Education_Cost"] = current_country["Education_Cost"] * \
+            education_multiplicator
+        current_country["Savings"] = current_country["Net_Income"] - current_country["Housing_Cost"] - \
+            current_country["Healthcare_Cost"] - current_country["Education_Cost"] - \
+            current_country["Transportation_Cost"]
 
         if extra_country and extra_country == current_country["Country"]:
-            current_country["Country"] = f'{current_country["Country"]} (Selected)'
+            current_country["Country"] = f'{
+                current_country["Country"]} (Selected)'
             if current_country["Year"] == 2023:
                 selected_country = current_country
 
@@ -555,7 +603,7 @@ async def recommended_countries(
         if i["Country"].endswith("(Selected)"):
             break
     # ...wird das letzte Land...
-    else: 
+    else:
         # ... mit dem ausgewählten ersezt
         if selected_country:
             top_countries[-1] = selected_country
@@ -578,7 +626,8 @@ async def recommended_countries(
     for top_country in top_countries:
         # Sortiert die Länder nach jahr für jeden Dict eintrag und speichert diese als Liste
         previous_years = sorted(
-            [c for c in missing_country_years_sorted.get(top_country["Country"], []) if c["Year"] != 2023],
+            [c for c in missing_country_years_sorted.get(
+                top_country["Country"], []) if c["Year"] != 2023],
             key=lambda x: -x["Year"]
         )
 
@@ -588,5 +637,3 @@ async def recommended_countries(
         new_countries[insert_index:insert_index] = previous_years
 
     return new_countries
-
-
