@@ -1,3 +1,4 @@
+from hmac import new
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
@@ -183,6 +184,23 @@ def create_stacked_bar_chart(
             # Abstand von Gruppen
             position += gap_between_groups
 
+    # Anpassen der x-Achse
+    new_x_positions = []
+    new_x_labels = []
+    for i in range(0, len(x_positions)-1, 2):
+        new_x_positions.append((x_positions[i] + x_positions[i+1]) / 2)
+        new_x_labels.append(x_labels[i].split("<br>")[0])
+
+    # Position für die Ländernamen
+    for index, i in enumerate(range(0, len(new_x_positions), len(years))):
+        avg_pos = sum(new_x_positions[i:i + len(years)]) / len(years)
+
+        new_x_positions.append(avg_pos - 0.001)
+
+        country_name = f"{index + 1}. {country_names[index]}"
+
+        new_x_labels.append(f"<br>{country_name}")
+
     # -- Layout --
     fig.update_layout(
         barmode='stack',
@@ -192,10 +210,9 @@ def create_stacked_bar_chart(
         showlegend=False,
         height=800,
         width=1200,
-        # TODO anpassen sodass keine dopplungen auftreten
         xaxis=dict(
-            tickvals=x_positions,
-            ticktext=x_labels
+            tickvals=new_x_positions,
+            ticktext=new_x_labels,
         )
     )
 
