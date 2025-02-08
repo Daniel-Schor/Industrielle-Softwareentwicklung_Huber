@@ -4,31 +4,38 @@ import pandas as pd
 
 from api_fetcher import fetch_recommendation_data, fetch_countries, fetch_regions
 
+colors = {
+    "Housing Cost": "#984ea3",
+    "Healthcare Cost": "#ff7f00",
+    "Education Cost": "#a65628",
+    "Transportation Cost": "#e41a1c",
+    "Net Income": "#377eb8",
+    "Gross Income": "#4daf4a"
+}
+
 
 def create_stacked_bar_chart(data):
-    # TODO net income und tax in ein bar
-    # TODO anders gliedern: länder auflisten, bezeichnungen vereinfachen, "Recommendations"
     df = pd.DataFrame(data)
     # Sortierung nach Country, Year und Category
     df = df.sort_values(by=['Country', 'Year'])
 
     fig = go.Figure()
 
-    countries = df['Country'].unique()
+    country_names = get_country_name_list(data)
+
     years = df['Year'].unique()
     width = 0.2  # schmalere Balken für bessere Übersicht
-    gap_between_groups = 0.6  # größerer Abstand zwischen den Gruppen
-    gap_within_group = 0.05   # kleinerer Abstand innerhalb der Gruppen
-
-    colors = ['#984ea3', '#ff7f00', '#a65628', '#e41a1c', '#377eb8', '#4daf4a']
+    gap_between_groups = 0.07  # größerer Abstand zwischen den Gruppen
+    gap_within_group = 0.03   # kleinerer Abstand innerhalb der Gruppen
 
     position = 0  # Positionstracker für die Balken
     x_labels = []  # Liste für die Beschriftungen der x-Achse
     x_positions = []  # Numerische Positionen für die Balken
 
-    country_names = get_country_name_list(data)
+    for country in country_names:
+        # Abstand zwischen den Ländern
+        position += 0.3
 
-    for country in sorted(countries):
         for year in sorted(years):
             year_data = df[(df['Country'] == country) & (df['Year'] == year)]
             if year_data.empty:
@@ -37,8 +44,9 @@ def create_stacked_bar_chart(data):
             # Balken in 3er-Gruppen (Costs, Income, Net Income)
             categories = ['Costs', 'Income']
 
-            for i, category in enumerate(categories):
+            for category in categories:
                 label = f"{country_names.index(country) + 1} - {year}"
+
                 x_labels.append(label)
                 x_positions.append(position)
 
@@ -47,63 +55,92 @@ def create_stacked_bar_chart(data):
                         x=[position],
                         y=year_data['Housing_Cost'],
                         name='Housing Cost',
-                        marker=dict(color=colors[0]),
+                        marker=dict(color=colors["Housing Cost"]),
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[0]};'>Housing Cost</span><br>{year_data['Housing_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"<span style='color:{colors["Housing Cost"]};'>Housing Cost</span><br>{year_data['Housing_Cost'].values[0]:.2f}</span><extra></extra>"
                     ))
 
                     fig.add_trace(go.Bar(
                         x=[position],
                         y=year_data['Healthcare_Cost'],
                         name='Healthcare Cost',
-                        marker=dict(color=colors[1]),
+                        marker=dict(color=colors["Healthcare Cost"]),
                         base=year_data['Housing_Cost'],
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[1]};'>Healthcare Cost</span><br>{year_data['Healthcare_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"""<span style='color:{colors["Healthcare Cost"]};'>Healthcare Cost</span>
+                            <br>{year_data['Healthcare_Cost'].values[0]:.2f}</span>
+                            <br><span style='color:{colors["Healthcare Cost"]};'>Total</span>
+                            <br>{(year_data['Healthcare_Cost']+year_data['Housing_Cost']).values[0]:.2f}</span><extra></extra>
+                        """
                     ))
+
+                    current_costs = year_data['Housing_Cost'] + \
+                        year_data['Healthcare_Cost']
 
                     fig.add_trace(go.Bar(
                         x=[position],
                         y=year_data['Education_Cost'],
                         name='Education Cost',
-                        marker=dict(color=colors[2]),
-                        base=year_data['Housing_Cost'] +
-                        year_data['Healthcare_Cost'],
+                        marker=dict(color=colors["Education Cost"]),
+                        base=current_costs,
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[2]};'>Education Cost</span><br>{year_data['Education_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"""<span style='color:{colors["Education Cost"]};'>Education Cost</span>
+                            <br>{year_data['Education_Cost'].values[0]:.2f}</span>
+                            <br><span style='color:{colors["Education Cost"]};'>Total</span>
+                            <br>{(year_data['Education_Cost']+current_costs).values[0]:.2f}</span><extra></extra>
+                        """
                     ))
+
+                    current_costs += year_data['Education_Cost']
 
                     fig.add_trace(go.Bar(
                         x=[position],
                         y=year_data['Transportation_Cost'],
                         name='Transportation Cost',
-                        marker=dict(color=colors[3]),
-                        base=year_data['Housing_Cost'] +
-                        year_data['Healthcare_Cost'] +
-                        year_data['Education_Cost'],
+                        marker=dict(color=colors["Transportation Cost"]),
+                        base=current_costs,
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[3]};'>Transportation Cost</span><br>{year_data['Transportation_Cost'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"""<span style='color:{colors["Transportation Cost"]};'>Transportation Cost</span>
+                            <br>{year_data['Transportation_Cost'].values[0]:.2f}</span>
+                            <br><span style='color:{colors["Transportation Cost"]};'>Total</span>
+                            <br>{(year_data['Transportation_Cost']+current_costs).values[0]:.2f}</span><extra></extra>
+                        """
                     ))
+
+                    current_costs += year_data['Transportation_Cost']
                 else:
+                    # fig.add_trace(go.Bar(
+                    #    x=[position],
+                    #    y=current_costs,
+                    #    name='Net Income',
+                    #    marker=dict(color=colors[4]),
+                    #    width=width,
+                    #    hovertemplate=f"<span style='color:{colors[4]};'>Total Costs</span><br>{current_costs.values[0]:.2f}</span><extra></extra>"
+                    # ))
+
                     fig.add_trace(go.Bar(
                         x=[position],
-                        y=year_data['Net_Income'],
+                        y=year_data['Net_Income'],  # - current_costs,
                         name='Net Income',
-                        marker=dict(color=colors[4]),
+                        marker=dict(color=colors["Net Income"]),
                         width=width,
-                        hovertemplate=f"<span style='color:{colors[4]};'>Net Income</span><br>{year_data['Net_Income'].values[0]:.2f}</span><extra></extra>"
+                        hovertemplate=f"""<span style='color:{colors["Net Income"]};'>Net Income</span>
+                            <br>{year_data['Net_Income'].values[0]:.2f}
+                            <br><span style='color:{colors["Net Income"]};'>Disposable income</span>
+                            <br>{(year_data['Net_Income']-current_costs).values[0]:.2f}</span><extra></extra>
+                        """
                     ))
 
                     fig.add_trace(go.Bar(
                         x=[position],
                         y=year_data['Average_Monthly_Income'] -
                         year_data['Net_Income'],
-                        name='Average Monthly Income',
-                        marker=dict(color=colors[5]),
+                        name='Gross Income',
+                        marker=dict(color=colors["Gross Income"]),
                         width=width,
-                        hovertemplate=f"""<span style='color:{colors[5]};'>Average Monthly Income</span>
-                            <br>{year_data['Average_Monthly_Income'].values[0]:.2f}<br>
-                            <br><span style='color:{colors[5]};'>Tax</span>
+                        hovertemplate=f"""<span style='color:{colors["Gross Income"]};'>Gross Income</span>
+                            <br>{year_data['Average_Monthly_Income'].values[0]:.2f}
+                            <br><span style='color:{colors["Gross Income"]};'>Tax</span>
                             <br>{(year_data['Average_Monthly_Income']-year_data['Net_Income']).values[0]:.2f}</span><extra></extra>
                         """
                     ))
@@ -205,6 +242,18 @@ else:
 
             st.markdown(recommendations)
 
-            # TODO Color legend
+            # Colored legend
+            st.markdown("#### Color Meaning")
+
+            # TODO auf kategorie kosten und einkommen anpassen
+            for label, color in colors.items():
+                st.markdown(
+                    f"<div style='display: flex; align-items: center;'>"
+                    f"<div style='width: 15px; height: 15px; background-color: {color}; margin-right: 10px;'></div>"
+                    f"<span>{label}</span>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+
             st.info(
                 "INFO")
