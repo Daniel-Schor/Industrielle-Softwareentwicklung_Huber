@@ -23,7 +23,7 @@ Dies ist ein Projekt für ein Dashboard zur analyse der CostOfLivingAndIncome Da
 > **ETL ausführen**
 ``` python src\database\ETL\ETL.py ```
 
-### Porjekt starten:
+### Projekt starten:
 > **env Verzeichnis aktivieren**
 ``` env\Scripts\activate ```
 
