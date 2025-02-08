@@ -19,9 +19,9 @@ _selected_y_axis = st.sidebar.selectbox(
     help="Select the metric you want to analyze and compare the Regions with."
 )
 
-# TODO finish header
 # -- Header --
 st.title("MoveSmart")
+# TODO text anpassen
 st.text("Whether you're planning to move abroad or are simply curious about the \
         financial conditions in other countries, our platform provides \
         a data-driven and personalized solution to help you make informed \
@@ -60,7 +60,6 @@ if not _df_region.empty:
 
 st.plotly_chart(fig_region)
 
-# TODO finish footer
 # -- Footer --
 st.markdown(
     """
@@ -68,7 +67,7 @@ st.markdown(
             Created by Team 6<br>
             Industrielle Softwareentwicklung - Huber<br>
             Frankfurt University of Applied Sciences<br>
-            Esrom J. - Daniel S. - Mavin M. S. - Davide P.
+            Esrom J. | Daniel S. | Mavin-M. S. | Davide P.
         </p>
     """,
     unsafe_allow_html=True

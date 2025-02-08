@@ -305,7 +305,7 @@ with col2:
     # ---- Beschreibung ----
     st.markdown("## Summary")
 
-    # TODO analyze
+    # TODO text anpassen
     st.text("Based on your preferences and household details, we have found the following \
             countries that match your criteria. These recommendations are ranked by the disposable \
             income available in 2023 after deducting housing, healthcare, education, and transportation \

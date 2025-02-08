@@ -4,8 +4,6 @@ import plotly.graph_objects as go
 from api_fetcher import fetch_country_data, fetch_countries
 from helper import convert_to_dataframe
 
-# TODO analyze
-
 # -- Sidebar --
 selected_country = st.sidebar.selectbox(
     "Country",
