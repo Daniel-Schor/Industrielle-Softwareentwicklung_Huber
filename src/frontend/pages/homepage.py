@@ -13,7 +13,11 @@ _numerical_columns = [
 
 _options = {col.replace("_", " ").title(): col for col in _numerical_columns}
 
-_selected_y_axis = st.sidebar.selectbox("Metric Selection", _options.keys())
+_selected_y_axis = st.sidebar.selectbox(
+    "Metric Selection",
+    _options.keys(),
+    help="Select the metric you want to analyze and compare the Regions with."
+)
 
 # TODO finish header
 # -- Header --

@@ -7,7 +7,11 @@ from helper import convert_to_dataframe
 # TODO analyze
 
 # -- Sidebar --
-selected_country = st.sidebar.selectbox("Country", fetch_countries())
+selected_country = st.sidebar.selectbox(
+    "Country",
+    fetch_countries(),
+    help="Select the Country you want to analyze and take a closer look at."
+)
 
 # -- Data Fetching --
 df_country = convert_to_dataframe(fetch_country_data(selected_country))
