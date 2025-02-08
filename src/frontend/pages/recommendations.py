@@ -4,6 +4,8 @@ import pandas as pd
 
 from api_fetcher import fetch_recommendation_data, fetch_countries, fetch_regions
 
+# TODO aufräumen
+
 colors = {
     "Housing Cost": "#984ea3",
     "Healthcare Cost": "#ff7f00",
@@ -12,6 +14,8 @@ colors = {
     "Net Income": "#377eb8",
     "Gross Income": "#4daf4a"
 }
+
+country_disposable_income = {}
 
 
 def create_stacked_bar_chart(data):
@@ -117,7 +121,9 @@ def create_stacked_bar_chart(data):
                     #    width=width,
                     #    hovertemplate=f"<span style='color:{colors[4]};'>Total Costs</span><br>{current_costs.values[0]:.2f}</span><extra></extra>"
                     # ))
-
+                    if (year_data['Year'] == 2023).values[0]:
+                        country_disposable_income[country] = (
+                            year_data['Net_Income']-current_costs).values[0]
                     fig.add_trace(go.Bar(
                         x=[position],
                         y=year_data['Net_Income'],  # - current_costs,
@@ -153,7 +159,7 @@ def create_stacked_bar_chart(data):
 
     fig.update_layout(
         barmode='stack',
-        title='Stacked Bar Chart of Costs, Average Income, and Net Income by Country, Year, and Category',
+        title='Development of Costs and Income',
         xaxis_title='Country - Year',
         yaxis_title='Amount in $',
         showlegend=False,  # Legende ausblenden
@@ -185,7 +191,7 @@ income_multiplicator = st.sidebar.number_input(
 
 st.sidebar.title("Preferences")
 region = st.sidebar.selectbox(
-    "Desired Region", [None] + fetch_regions(), index=0,
+    "Preferred Region", [None] + fetch_regions(), index=0,
     help="Region of most interest.")
 extra_country = st.sidebar.selectbox(
     "Comparison Country", [None] + fetch_countries(), index=0,
@@ -216,7 +222,7 @@ def get_country_name_list(
     return countries
 
 
-st.title("Recommendations")
+st.title("Top Matches")
 
 # Validierung der Eingabe
 if education_multiplicator > healthcare_multiplicator or income_multiplicator > healthcare_multiplicator:
@@ -231,29 +237,44 @@ else:
         with col1:
             create_stacked_bar_chart(data)
 
+        # Legende
         with col2:
-            st.markdown("### Legend")
-            st.text(
-                "List of recommended countries based on your preferences and demografic data."
-            )
+            st.markdown("## Summary")
+            st.text("Based on your preferences and household details, we have found the following \
+                    countries that match your criteria. These recommendations are ranked by the disposable \
+                    income available in 2023 after deducting housing, healthcare, education, and transportation \
+                    costs from the net income. The countries listed below provide the best balance of income and \
+                    essential expenses, ensuring you maximize your savings potential.")
 
             recommendations = "\n".join(
-                [f"{i + 1}. {country}" for i, country in enumerate(get_country_name_list(data))])
+                [f"{i + 1}. {country} | {country_disposable_income[country]:.2f}$" for i, country in enumerate(get_country_name_list(data))])
+
+            st.markdown(f"### Top Matches")
 
             st.markdown(recommendations)
 
-            # Colored legend
-            st.markdown("#### Color Meaning")
+            legend_categories = {
+                "Costs": ["Housing Cost", "Healthcare Cost", "Education Cost", "Transportation Cost"],
+                "Income": ["Net Income", "Gross Income"]
+            }
 
-            # TODO auf kategorie kosten und einkommen anpassen
-            for label, color in colors.items():
+            st.markdown("### Data Categories")
+            for category, items in legend_categories.items():
                 st.markdown(
-                    f"<div style='display: flex; align-items: center;'>"
-                    f"<div style='width: 15px; height: 15px; background-color: {color}; margin-right: 10px;'></div>"
-                    f"<span>{label}</span>"
-                    f"</div>",
+                    f"<div style='margin-bottom: 5px; margin-top: 10px; font-weight: bold;'>{category}</div>",
                     unsafe_allow_html=True
                 )
 
-            st.info(
-                "INFO")
+                for label in items:
+                    color = colors[label]
+                    st.markdown(
+                        f"""
+                        <div style='display: flex; align-items: center; margin-bottom: 3px;'>
+                            <div style='width: 15px; height: 15px; background-color: {color}; margin-right: 10px; border-radius: 2px;'></div>
+                            <span style='font-size: 14px;'>{label}</span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+            # st.info("INFO")
