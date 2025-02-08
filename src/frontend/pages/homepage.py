@@ -21,14 +21,18 @@ _selected_y_axis = st.sidebar.selectbox(
 
 # -- Header --
 st.title("MoveSmart")
-# TODO text anpassen
-st.text("Whether you're planning to move abroad or are simply curious about the \
-        financial conditions in other countries, our platform provides \
-        a data-driven and personalized solution to help you make informed \
-        decisions. With our user-friendly dashboard, you can analyze cost \
-        and income ratios worldwide, find the best country for your needs, \
-        and gain detailed insights into the financial conditions of your desired destinations. \
-        ")
+
+st.text("Whether you're planning a long-term stay abroad, considering a move \
+        to another country, or simply curious about the financial conditions \
+        in different parts of the world, our platform provides the tools you \
+        need to make informed decisions. With our user-friendly dashboard, you \
+        can analyze cost and income ratios worldwide, find the ideal country for \
+        your needs, and gain detailed insights into the financial conditions of \
+        your desired destinations. Our data-driven and personalized solution \
+        helps you create realistic forecasts, compare countries effortlessly, \
+        and make the best choice for your future. Whether you're traveling solo, \
+        with a group, or planning to start a family abroad, we’re here to help \
+        you navigate the financial challenges of living in a new country.")
 
 
 # -- Chart --
@@ -51,6 +55,7 @@ if not _df_region.empty:
         xaxis_title="Year",
         yaxis_title=_selected_y_axis,
         template="plotly_dark",
+        height=520,
         xaxis=dict(
             tickmode='array',
             tickvals=unique_years,

@@ -33,6 +33,7 @@ if not df_country.empty:
         xaxis_title="Year",
         yaxis_title="Amount ($)",
         template="plotly_dark",
+        height=400,
         xaxis=dict(
             tickmode='array',
             tickvals=unique_years,
@@ -64,6 +65,7 @@ if not df_country.empty:
         xaxis_title="Year",
         yaxis_title="Amount ($)",
         template="plotly_dark",
+        height=400,
         xaxis=dict(
             tickmode='array',
             tickvals=unique_years,

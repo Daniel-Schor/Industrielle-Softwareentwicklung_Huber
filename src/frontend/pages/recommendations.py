@@ -305,12 +305,15 @@ with col2:
     # ---- Beschreibung ----
     st.markdown("## Summary")
 
-    # TODO text anpassen
-    st.text("Based on your preferences and household details, we have found the following \
-            countries that match your criteria. These recommendations are ranked by the disposable \
-            income available in 2023 after deducting housing, healthcare, education, and transportation \
-            costs from the net income. The countries listed below provide the best balance of income and \
-            essential expenses, ensuring you maximize your savings potential.")
+    st.text("Based on your preferences and household details, \
+            we have identified the following countries that best \
+            match your criteria. These recommendations are ranked \
+            by the disposable income available in 2023 after deducting \
+            housing, healthcare, education, and transportation costs from \
+            the net income. The diagram illustrates the changes over the \
+            past years. The countries listed below offer the best balance \
+            between income and essential expenses, maximizing your savings \
+            potential.")
 
     recommendations = "\n".join(
         [f"{i + 1}. {country} | {_country_disposable_income[country]:.2f}$" for i,
