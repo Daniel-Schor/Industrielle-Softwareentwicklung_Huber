@@ -1,24 +1,22 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-from api_fetcher import fetch_region_data, fetch_country_data, fetch_countries, convert_to_dataframe
+from api_fetcher import fetch_country_data, fetch_countries
+from helper import convert_to_dataframe
 
+# TODO analyze
 
-# Fetch region data
-region_data = fetch_region_data()
+# -- Sidebar --
+selected_country = st.sidebar.selectbox("Country", fetch_countries())
 
-df_region = convert_to_dataframe(region_data)
-
-country_options = fetch_countries()
-
-selected_country = st.sidebar.selectbox("Country", country_options)
-
-country_data = fetch_country_data(selected_country)
-df_country = convert_to_dataframe(country_data)
+# -- Data Fetching --
+df_country = convert_to_dataframe(fetch_country_data(selected_country))
 unique_years = sorted(df_country["Year"].unique())
 
+# -- Page Title --
 st.title(f"Analysis for {selected_country}")
 
+# -- Income over time --
 fig_country = go.Figure()
 if not df_country.empty:
     fig_country.add_trace(go.Scatter(
@@ -47,10 +45,9 @@ if not df_country.empty:
         "Housing_Cost", "Healthcare_Cost", "Education_Cost", "Transportation_Cost"
     ]
 
-# Costs over Time
+# -- Costs over Time --
 fig_costs = go.Figure()
 if not df_country.empty:
-    #    fig_costs.add_trace(go.Scatter(x=df_country["Year"], y=df_country["Cost_of_Living"], mode='lines', name="Cost of Living"))
     fig_costs.add_trace(go.Scatter(
         x=df_country["Year"], y=df_country["Housing_Cost"], mode='lines', name="Housing Cost"))
     fig_costs.add_trace(go.Scatter(
@@ -72,16 +69,18 @@ if not df_country.empty:
         )
     )
 
-    if not latest_year_data.empty:
-        pie_data = latest_year_data[pie_columns].iloc[0].to_dict()
-        fig_pie = go.Figure(data=[go.Pie(labels=list(
-            pie_data.keys()), values=list(pie_data.values()), hole=0.3)])
-        fig_pie.update_layout(
-            title=f"Distribution for {latest_year} in {selected_country}", template="plotly_dark")
+# -- Pie Chart --
+if not latest_year_data.empty:
+    pie_data = latest_year_data[pie_columns].iloc[0].to_dict()
+    fig_pie = go.Figure(data=[go.Pie(labels=list(
+        pie_data.keys()), values=list(pie_data.values()), hole=0.3)])
+    fig_pie.update_layout(
+        title=f"Distribution for {latest_year} in {selected_country}", template="plotly_dark")
 
-        col1, col2 = st.columns([1, 0.5])
-        with col1:
-            st.plotly_chart(fig_country)
-            st.plotly_chart(fig_costs)
-        with col2:
-            st.plotly_chart(fig_pie)
+# -- Display --
+col1, col2 = st.columns([1, 0.5])
+with col1:
+    st.plotly_chart(fig_country)
+    st.plotly_chart(fig_costs)
+with col2:
+    st.plotly_chart(fig_pie)

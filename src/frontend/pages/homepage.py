@@ -1,7 +1,8 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-from api_fetcher import fetch_region_data, convert_to_dataframe
+from api_fetcher import fetch_region_data
+from helper import convert_to_dataframe
 
 _df_region = convert_to_dataframe(fetch_region_data())
 

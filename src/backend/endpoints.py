@@ -1,30 +1,30 @@
 import math
 import os
+from typing import List
+
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import Column, Integer, String, Float, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import select, distinct
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from typing import List
 
-# Absolute path to the database file
+# Absoluter Pfad zur Datenbank
 DATABASE_PATH = os.path.join(
     os.getcwd(), 'src', 'database', 'CostOfLivingAndIncome.db'
 )
 
-# database URL to the absolute path
+# Datenbank URL
 DATABASE_URL = f"sqlite+aiosqlite:///{DATABASE_PATH}"
 
-# Set up the database connection
+# Erstellen der Datenbankverbindung
 engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
 Base = declarative_base()
 
-# Define the model for your table
 
-
+# Datenmodell für die Tabelle CostOfLivingAndIncome
 class CostOfLivingAndIncome(Base):
     """
         Definition der Tabelle CostOfLivingAndIncome
@@ -33,7 +33,6 @@ class CostOfLivingAndIncome(Base):
 
     __tablename__ = "CostOfLivingAndIncome"
 
-    # Country als Primärschlüssel
     Country = Column(String, primary_key=True, index=True)
     Year = Column(Integer)
     Average_Monthly_Income = Column(Float)
@@ -56,10 +55,7 @@ class CostOfLivingAndIncome(Base):
     Region = Column(String)
 
 
-# Initialize the router for FastAPI
 router = APIRouter()
-
-# Dependency to get the DB session
 
 
 async def get_db():
@@ -73,10 +69,11 @@ async def get_db():
         yield session
 
 
-@router.get("/all-information-for-region")
-async def get_all_data_for_region(session: AsyncSession = Depends(get_db)) -> List[dict]:
+@router.get("/region-information")
+async def get_region_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
     """
         Endpoint um alle Daten gruppiert nach Regionen abzufragen
+
     :returns: Das Ergebnis der Abfrage
     """
     query = select(
@@ -159,8 +156,9 @@ async def get_regions(
     session: AsyncSession = Depends(get_db)
 ) -> List[str]:
     """
+        Ruft alle Regionen ab
 
-    :return: 
+    :return: Liste aller Regionennamen
     """
 
     query = select(distinct(CostOfLivingAndIncome.Region))
@@ -180,8 +178,9 @@ async def get_countries(
     session: AsyncSession = Depends(get_db)
 ) -> List[str]:
     """
+        Ruft alle Länder ab
 
-    :return: 
+    :return: Liste aller Ländernamen
     """
 
     query = select(distinct(CostOfLivingAndIncome.Country))
@@ -198,9 +197,9 @@ async def get_countries(
 
 @router.get("/recommended-countries", response_model=List[dict])
 async def recommended_countries(
-    healthcare_multiplicator: int = 1,
-    education_multiplicator: int = 0,
-    income_multiplicator: float = 1,
+    number_people: int = 1,
+    number_students: int = 0,
+    number_workforce: float = 1,
     extra_country: str = None,
     start_year: int = 2021,
     region: str = None,
@@ -212,35 +211,31 @@ async def recommended_countries(
         Ermöglicht ein weiteres Land auszuwählen, um zu sehen, wie es im Vergleich abschneidet.
 
         Faktoren:
-        - healthcare_multiplicator
-        - education_multiplicator
-        - income_multiplicator
+        - number_people: Die Anzahl der Personen im Haushalt beeinflusst die Kosten für Gesundheit, Bildung, 
+            Transport und Wohnen. Mit steigender Personenanzahl werden bestimmte Kosten proportional oder stufenweise erhöht.
+        - Transportkosten verdoppeln sich ab 3 Personen.
+        - Wohnkosten steigen um 25 % pro 6 Personen.
+        - number_students: Die Anzahl der Schüler oder Studenten im Haushalt erhöht direkt die Bildungskosten.
+        - number_workforce: Die Anzahl der Berufstätigen im Haushalt beeinflusst das verfügbare Einkommen. 
+            Vollzeitbeschäftigte (1.0) tragen mehr bei als Teilzeitbeschäftigte (z. B. 0.5).
 
-        Regionen:
-        - Africa
-        - Asia
-        - Europe
-        - North America
-        - Oceania
-        - South America
+    :param number_people: Anzahl der Personen
+    :param number_students: Anzahl der Studenten/Schüler
+    :param number_workforce: Anzahl der Berufstätigen (1 = Vollzeit, 0.5 = Teilzeit)
+    :param extra_country: Zusätzliches Land
+    :param start_year: Startjahr
+    :param region: Regionsfilter
 
-    :param healthcare_multiplicator: XXX
-    :param education_multiplicator: XXX
-    :param income_multiplicator: XXX
-    :param extra_country: XXX
-    :param start_year: XXX
-    :param region: XXX
-
-    :return: A list of dictionaries containing the data
+    :return: Liste der Top 3(+1) Länder
     """
 
-    if healthcare_multiplicator < 1:
+    if number_people < 1:
         raise HTTPException(
             status_code=400, detail="Healthcare Multiplicator must be greater or equal to 1.")
-    if education_multiplicator < 0 or income_multiplicator < 0:
+    if number_students < 0 or number_workforce < 0:
         raise HTTPException(
             status_code=400, detail="Multiplicators must be greater than 0.")
-    if education_multiplicator > healthcare_multiplicator or income_multiplicator > healthcare_multiplicator:
+    if number_students > number_people or number_workforce > number_people:
         raise HTTPException(
             status_code=400, detail="Education and Income Multiplicator must be smaller or equal to Healthcare Multiplicator.")
 
@@ -289,19 +284,19 @@ async def recommended_countries(
         }
 
         current_country["Average_Monthly_Income"] = current_country["Average_Monthly_Income"] * \
-            income_multiplicator
+            number_workforce
         current_country["Net_Income"] = current_country["Net_Income"] * \
-            income_multiplicator
+            number_workforce
         current_country["Healthcare_Cost"] = current_country["Healthcare_Cost"] * \
-            healthcare_multiplicator
+            number_people
         # Ab 3 Leuten wird Transportation doppelt so teurer
         current_country["Transportation_Cost"] = current_country["Transportation_Cost"] * \
-            1 + (math.floor(healthcare_multiplicator / 3))
+            1 + (math.floor(number_people / 3))
         # Ab 5 Leuten wird Housing 25% teurer
         current_country["Housing_Cost"] = current_country["Housing_Cost"] * \
-            1 + (math.floor(healthcare_multiplicator / 6) * 0.25)
+            1 + (math.floor(number_people / 6) * 0.25)
         current_country["Education_Cost"] = current_country["Education_Cost"] * \
-            education_multiplicator
+            number_students
         current_country["Savings"] = current_country["Net_Income"] - current_country["Housing_Cost"] - \
             current_country["Healthcare_Cost"] - current_country["Education_Cost"] - \
             current_country["Transportation_Cost"]
@@ -335,8 +330,7 @@ async def recommended_countries(
         else:
             top_countries = top_countries[:3]
 
-# TODO komplexität reduzieren!
-# -- Hinzufügen der anderen Jahre --
+    # -- Hinzufügen der anderen Jahre --
 
     new_countries = top_countries.copy()
 

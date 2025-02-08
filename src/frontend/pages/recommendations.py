@@ -1,7 +1,6 @@
-from hmac import new
+import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
-import pandas as pd
 
 from api_fetcher import fetch_recommendation_data, fetch_countries, fetch_regions
 from helper import get_country_name_list
@@ -281,12 +280,12 @@ st.title("Top Matches")
 # ---- Data fetching ----
 
 data = fetch_recommendation_data(
-    extra_country,
-    number_people,
-    number_students,
-    number_workforce,
-    region,
-    2023 - (years - 1)
+    number_people=number_people,
+    number_students=number_students,
+    number_workforce=number_workforce,
+    extra_country=extra_country,
+    start_year=2023 - (years - 1),
+    region=region
 )
 
 if not data:
@@ -305,6 +304,8 @@ with col1:
 with col2:
     # ---- Beschreibung ----
     st.markdown("## Summary")
+
+    # TODO analyze
     st.text("Based on your preferences and household details, we have found the following \
             countries that match your criteria. These recommendations are ranked by the disposable \
             income available in 2023 after deducting housing, healthcare, education, and transportation \
