@@ -205,7 +205,7 @@ def create_stacked_bar_chart(
     fig.update_layout(
         barmode='stack',
         title='Development of Costs and Income',
-        xaxis_title='Country - Year',
+        # xaxis_title='Country - Year',
         yaxis_title='Amount in $',
         showlegend=False,
         height=800,
