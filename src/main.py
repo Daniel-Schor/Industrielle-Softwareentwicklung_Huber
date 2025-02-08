@@ -4,3 +4,4 @@ from .backend import endpoints
 app = FastAPI()
 
 app.include_router(endpoints.router)
+# Daniel Schor

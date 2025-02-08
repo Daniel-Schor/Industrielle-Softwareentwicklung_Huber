@@ -9,6 +9,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import select, distinct
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
+# Davide Pedergnana 
+
 # Absoluter Pfad zur Datenbank
 DATABASE_PATH = os.path.join(
     os.getcwd(), 'src', 'database', 'CostOfLivingAndIncome.db'
@@ -22,7 +24,6 @@ engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
 Base = declarative_base()
-
 
 # Datenmodell für die Tabelle CostOfLivingAndIncome
 class CostOfLivingAndIncome(Base):
@@ -57,7 +58,7 @@ class CostOfLivingAndIncome(Base):
 
 router = APIRouter()
 
-
+# Davide Pedergnana
 async def get_db():
     """
         Dependency um die Datenbankverbindung zu erhalten
@@ -68,7 +69,7 @@ async def get_db():
     async with SessionLocal() as session:
         yield session
 
-
+# Davide Pedergnana 
 @router.get("/region-information")
 async def get_region_data(session: AsyncSession = Depends(get_db)) -> List[dict]:
     """
@@ -150,7 +151,7 @@ async def get_country_data(
         for row in data
     ]
 
-
+# Daniel Schor
 @router.get("/regions", response_model=List[str])
 async def get_regions(
     session: AsyncSession = Depends(get_db)
@@ -194,6 +195,7 @@ async def get_countries(
 
     return [row[0] for row in data]
 
+# Daniel Schor 
 
 @router.get("/recommended-countries", response_model=List[dict])
 async def recommended_countries(

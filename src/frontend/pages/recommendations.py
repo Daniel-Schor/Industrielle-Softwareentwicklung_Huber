@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from api_fetcher import fetch_recommendation_data, fetch_countries, fetch_regions
 from helper import get_country_name_list
 
+# Esrom Johannes
 # ----------------------------- Constanten/Variablen -----------------------------
 # Farben für die Bars
 _COLORS = {
@@ -217,7 +218,7 @@ def create_stacked_bar_chart(
 
     st.plotly_chart(fig)
 
-
+# Mavin-Moris Scholl
 # ----------------------------- Aufbau -----------------------------
 # ---- Sidebar ----
 st.sidebar.title("Demographics")

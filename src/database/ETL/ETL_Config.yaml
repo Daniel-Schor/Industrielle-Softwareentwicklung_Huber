@@ -2,3 +2,4 @@ CSV_PATH: 'data/Expanded_Country_Economic_Data.csv'
 DB_NAME: 'CostOfLivingAndIncome.db'
 TABLE_NAME: 'CostOfLivingAndIncome'
 
+# Daniel Schors

@@ -10,3 +10,5 @@ asyncpg == 0.30.0
 databases == 0.9.0
 aiosqlite == 0.21.0
 plotly==6.0.0
+
+# Geschrieben von Mavin-Moris Scholl und ergänzt durch die andere.

@@ -6,6 +6,8 @@ from helper import convert_to_dataframe
 
 _df_region = convert_to_dataframe(fetch_region_data())
 
+# Esrom.J | Daniel.S | Mavin-M.S | Davide.P
+
 # -- Sidebar --
 _numerical_columns = [
     col for col in _df_region.select_dtypes(include=["number"]).columns if col != "Year"

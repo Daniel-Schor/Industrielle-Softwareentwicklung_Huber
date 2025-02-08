@@ -4,7 +4,7 @@ import pandas as pd
 from tabulate import tabulate
 import yaml
 
-
+# Davide Pedergnana
 class ETL_Handler:
     """
         Klasse zum Einlesen einer CSV-Datei und Speichern der Daten in einer SQLite-Datenbank. ETL erfolgt hier drin.
@@ -43,7 +43,7 @@ class ETL_Handler:
             sep=",",
             encoding="utf-8-sig"
         )
-
+# Daniel Schor 
 # transform ---------------------------------------------------------------------------------------------------------
 
     def transform(self) -> None:
@@ -144,7 +144,7 @@ class ETL_Handler:
                 self._df[column.removesuffix(
                     suffix)] = self._df[column] * 0.01 * self._df["Net_Income"]
                 self.move_to_neighbour(column, column.removesuffix(suffix))
-
+# Mavin-Moris Scholl
     def move_to_neighbour(
             self,
             column,
@@ -175,6 +175,7 @@ class ETL_Handler:
 
         self._df[column_name] = self._df[columns].sum(axis=1)
 
+# Mavin-Moris Scholl
 # load ---------------------------------------------------------------------------------------------------------
 
     def save_to_db(
@@ -196,6 +197,7 @@ class ETL_Handler:
 
 # ---------------------------------------------------------------------------------------------------------
 
+# Davide Pedergnana
 
 class DB_Handler:
 

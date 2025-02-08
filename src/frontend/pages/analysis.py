@@ -4,6 +4,8 @@ import plotly.graph_objects as go
 from api_fetcher import fetch_country_data, fetch_countries
 from helper import convert_to_dataframe
 
+# Esrom.J | Daniel.S | Mavin-M.S | Davide.P
+
 # -- Sidebar --
 selected_country = st.sidebar.selectbox(
     "Country",
@@ -17,6 +19,7 @@ unique_years = sorted(df_country["Year"].unique())
 
 # -- Page Title --
 st.title(f"Analysis for {selected_country}")
+
 
 # -- Income over time --
 fig_country = go.Figure()
