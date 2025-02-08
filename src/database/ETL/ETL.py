@@ -40,8 +40,8 @@ class ETL_Handler:
 
         self._df = pd.read_csv(
             self._csv_path,
-            sep=",",  # Trennzeichen in der CSV-Datei
-            encoding="utf-8-sig"  # Kodierung der Datei
+            sep=",",
+            encoding="utf-8-sig"
         )
 
 # transform ---------------------------------------------------------------------------------------------------------
@@ -54,11 +54,11 @@ class ETL_Handler:
             2. Berechnung der Summe der Prozentwerte
             3. Berechnung der Dollar-Werte
             4. Berechnung der Summe aller Kosten
-            4.5 Speichern der Regionen
-            5. Gruppierung nach Land und Jahr (aggregieren anhand des Mittelwerts)
-            6. Sortierung nach Land und Jahr
-            7. Füllen fehlender Werte mit linearer Interpolation
-            7.5 Füllen der Regionen
+            5. Speichern der Regionen
+            6. Gruppierung nach Land und Jahr (aggregieren anhand des Mittelwerts)
+            7. Sortierung nach Land und Jahr
+            8. Füllen fehlender Werte mit linearer Interpolation
+            9. Füllen der Regionen
         """
 
         # 1.
