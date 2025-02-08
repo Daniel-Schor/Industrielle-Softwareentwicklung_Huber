@@ -3,20 +3,19 @@ import plotly.graph_objects as go
 
 from api_fetcher import fetch_region_data, convert_to_dataframe
 
+_df_region = convert_to_dataframe(fetch_region_data())
 
-region_data = fetch_region_data()
-
-df_region = convert_to_dataframe(region_data)
-
-numerical_columns = [
-    col for col in df_region.select_dtypes(include=["number"]).columns if col != "Year"
+# -- Sidebar --
+_numerical_columns = [
+    col for col in _df_region.select_dtypes(include=["number"]).columns if col != "Year"
 ]
 
-options = {col.replace("_", " ").title(): col for col in numerical_columns}
+_options = {col.replace("_", " ").title(): col for col in _numerical_columns}
 
-selected_y_axis = st.sidebar.selectbox("Metric Selection", options.keys())
+_selected_y_axis = st.sidebar.selectbox("Metric Selection", _options.keys())
 
 # TODO finish header
+# -- Header --
 st.title("MoveSmart")
 st.text("Whether you're planning to move abroad or are simply curious about the \
         financial conditions in other countries, our platform provides \
@@ -27,24 +26,25 @@ st.text("Whether you're planning to move abroad or are simply curious about the 
         ")
 
 
+# -- Chart --
 fig_region = go.Figure()
-if not df_region.empty:
-    regions = df_region["Region"].unique()
+if not _df_region.empty:
+    regions = _df_region["Region"].unique()
     for region in regions:
-        region_data = df_region[df_region["Region"] == region]
+        region_data = _df_region[_df_region["Region"] == region]
         fig_region.add_trace(go.Scatter(
             x=region_data["Year"],
-            y=region_data[options[selected_y_axis]],
+            y=region_data[_options[_selected_y_axis]],
             mode='lines',
             name=region
         ))
 
-    unique_years = sorted(df_region["Year"].unique())
+    unique_years = sorted(_df_region["Year"].unique())
 
     fig_region.update_layout(
-        title=f"<span>Overview of <u>{selected_y_axis}</u> by Regions per year</span>",
+        title=f"<span>Overview of <u>{_selected_y_axis}</u> by Regions per year</span>",
         xaxis_title="Year",
-        yaxis_title=selected_y_axis,
+        yaxis_title=_selected_y_axis,
         template="plotly_dark",
         xaxis=dict(
             tickmode='array',
@@ -56,6 +56,7 @@ if not df_region.empty:
 st.plotly_chart(fig_region)
 
 # TODO finish footer
+# -- Footer --
 st.markdown(
     """
         <p style='text-align: center; color: gray; font-size: 0.8em;'>
