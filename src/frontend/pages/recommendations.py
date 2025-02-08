@@ -10,7 +10,7 @@ from helper import get_country_name_list
 _COLORS = {
     "Housing Cost": "#984ea3",
     "Healthcare Cost": "#ff7f00",
-    "Education Cost": "#a65628",
+    "Education Cost": "#ffff33",
     "Transportation Cost": "#e41a1c",
     "Net Income": "#377eb8",
     "Gross Income": "#4daf4a"
