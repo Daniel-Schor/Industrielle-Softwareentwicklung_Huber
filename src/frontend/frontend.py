@@ -13,9 +13,9 @@ st.set_page_config(page_title="MoveSmart", layout="wide")
 # st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Load pages
-recommendations = st.Page("pages/recommendations.py", title="Find Best Country match",
+recommendations = st.Page("pages/recommendations.py", title="Find Best Country Match",
                           icon=":material/query_stats:")
-analysis = st.Page("pages/analysis.py", title="Detailed Country analysis",
+analysis = st.Page("pages/analysis.py", title="Detailed Country Analysis",
                    icon=":material/query_stats:")
 homepage = st.Page("pages/homepage.py", title="Homepage",
                    icon=":material/query_stats:")
