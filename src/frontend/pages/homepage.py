@@ -17,10 +17,14 @@ options = {col.replace("_", " ").title(): col for col in numerical_columns}
 selected_y_axis = st.sidebar.selectbox("Metric Selection", options.keys())
 
 # TODO finish header
-st.title("Problemstatement")
-st.text("""
-        Menschen, die einen mittel- bis langfristigen Aufenthalt im Ausland planen für z.B. Work and Travel, ein Studium oder für eine Auswanderung, haben das Problem, realistische Kosten- und Einkommensprognosen für ihr Zielland zu erstellen. Wichtige Informationen zu den Lebenshaltungskosten, Wohnkosten, Gesundheitsausgaben, Bildungskosten, Transportkosten sowie den dazugehörigen durchschnittlichen Einkommensverhältnissen und Steuersätzen sind oft unübersichtlich, intransparent oder schwer zu vergleichen. Basierend auf genannten Daten aus über 10 Ländern soll unser Tool mit individuellen Angaben des Verbrauchers aufzeigen, welche Länder für den möglichen Abschnittswechel die besten Voraussetzungen bieten.
-        """)
+st.title("MoveSmart")
+st.text("Whether you're planning to move abroad or are simply curious about the \
+        financial conditions in other countries, our platform provides \
+        a data-driven and personalized solution to help you make informed \
+        decisions. With our user-friendly dashboard, you can analyze cost \
+        and income ratios worldwide, find the best country for your needs, \
+        and gain detailed insights into the financial conditions of your desired destinations. \
+        ")
 
 
 fig_region = go.Figure()

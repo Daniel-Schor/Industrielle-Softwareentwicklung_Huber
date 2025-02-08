@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="Analytics", layout="wide")
+st.set_page_config(page_title="MoveSmart", layout="wide")
 
 recommendations = st.Page("pages/recommendations.py", title="Find Best Country match",
                           icon=":material/query_stats:")
