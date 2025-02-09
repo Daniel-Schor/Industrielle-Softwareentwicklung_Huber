@@ -3,7 +3,7 @@ from typing import List
 import requests
 import streamlit as st
 
-# Esrom Johannes
+# Eingeführt durch Esrom Johannes und ergänzt durch Davide Pedergnana
 @st.cache_data
 def fetch_recommendation_data(
     number_people: int,

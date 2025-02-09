@@ -43,7 +43,7 @@ class ETL_Handler:
             sep=",",
             encoding="utf-8-sig"
         )
-# Daniel Schor 
+# Daniel Schor und Esrom Johannes
 # transform ---------------------------------------------------------------------------------------------------------
 
     def transform(self) -> None:

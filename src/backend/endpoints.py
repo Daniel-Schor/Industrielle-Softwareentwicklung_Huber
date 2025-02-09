@@ -151,7 +151,6 @@ async def get_country_data(
         for row in data
     ]
 
-# Daniel Schor
 @router.get("/regions", response_model=List[str])
 async def get_regions(
     session: AsyncSession = Depends(get_db)
@@ -173,7 +172,7 @@ async def get_regions(
 
     return [row[0] for row in data]
 
-
+# Daniel Schor 
 @router.get("/countries", response_model=List[str])
 async def get_countries(
     session: AsyncSession = Depends(get_db)
@@ -195,7 +194,6 @@ async def get_countries(
 
     return [row[0] for row in data]
 
-# Daniel Schor 
 
 @router.get("/recommended-countries", response_model=List[dict])
 async def recommended_countries(

@@ -54,4 +54,4 @@ https://studfrauasde-my.sharepoint.com/:w:/g/personal/uas0021351_stud_fra-uas_de
 
 ---
 
-# Geschrieben von Daniel Schor und Esrom Johannes
+# Geschrieben von Daniel Schor und Esrom Johannes und ergänzt von Davide Pedergnana und Mavin-Moris Scholl
