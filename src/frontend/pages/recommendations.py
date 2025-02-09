@@ -1,3 +1,4 @@
+from enum import auto
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
@@ -213,10 +214,12 @@ def create_stacked_bar_chart(
         xaxis=dict(
             tickvals=new_x_positions,
             ticktext=new_x_labels,
+            automargin=True
         )
     )
 
     st.plotly_chart(fig)
+
 
 # Mavin-Moris Scholl
 # ----------------------------- Aufbau -----------------------------
