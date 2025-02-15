@@ -75,19 +75,19 @@ class ETL_Handler:
         self.add_sum(
             "Sum_Costs", [column for column in self._df.columns if column.endswith("Cost")])
 
-        # 4.5
+        # 5.
         region_dict = self._df.groupby("Country")["Region"].first().to_dict()
 
-        # 5.
+        # 6.
         self._df = self._df.groupby(
             ["Country", "Year"], as_index=False).mean(numeric_only=True)
-        # 6.
+        # 7.
         self._df.sort_values(by=["Country", "Year"], inplace=True)
 
-        # 7. Störend mit dem neuen Datensatz
-        # self.fill_missing_values()
+        # 8.
+        self.fill_missing_values()
 
-        # 7.5
+        # 9.
         self._df["Region"] = self._df["Country"].map(region_dict)
 
     def fill_missing_values(self) -> None:
