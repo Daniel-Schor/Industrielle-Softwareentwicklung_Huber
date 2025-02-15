@@ -72,8 +72,7 @@ class ETL_Handler:
         self.calc_real_values()
 
         # 4.
-        self.add_sum(
-            "Sum_Costs", [column for column in self._df.columns if column.endswith("Cost")])
+        self.add_sum("Sum_Costs", [column for column in self._df.columns if column.endswith("Cost")])
 
         # 5.
         region_dict = self._df.groupby("Country")["Region"].first().to_dict()
