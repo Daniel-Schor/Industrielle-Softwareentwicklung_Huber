@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+*.db
+*.sqlite3
+.vscode/
+.DS_Store
+*.log
+*.png
+*.pptx
+*.zip
+Unterricht/
+Hausarbeit/

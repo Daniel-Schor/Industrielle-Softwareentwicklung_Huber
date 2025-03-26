@@ -3,6 +3,9 @@ from typing import List
 import requests
 import streamlit as st
 
+#_host = "http://localhost:8000"
+_host = "http://backend:8000"
+
 # Eingeführt durch Esrom Johannes und ergänzt durch Davide Pedergnana
 @st.cache_data
 def fetch_recommendation_data(
@@ -26,7 +29,7 @@ def fetch_recommendation_data(
     :return: Liste der Top 3(+1) Länder
     """
 
-    url = f"http://localhost:8000/recommended-countries?number_people={number_people}&number_students={number_students}&number_workforce={number_workforce}&start_year={start_year}"
+    url = f"{_host}/recommended-countries?number_people={number_people}&number_students={number_students}&number_workforce={number_workforce}&start_year={start_year}"
     if extra_country:
         url += f"&extra_country={extra_country}"
     if region:
@@ -47,7 +50,7 @@ def fetch_countries() -> list:
     :return: Die Liste aller Länder
     """
 
-    url = f"http://localhost:8000/countries"
+    url = f"{_host}/countries"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
@@ -64,7 +67,7 @@ def fetch_regions() -> list:
     :return: Die Liste aller Regionen
     """
 
-    url = f"http://localhost:8000/regions"
+    url = f"{_host}/regions"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
@@ -81,7 +84,7 @@ def fetch_region_data() -> dict:
     :return: Die Daten für alle Regionen
     """
 
-    response = requests.get('http://localhost:8000/region-information')
+    response = requests.get(f'{_host}/region-information')
     if response.status_code == 200:
         return response.json()
     else:
@@ -101,7 +104,7 @@ def fetch_country_data(
     :return: Die Daten für das angegebene Land
     """
 
-    url = f"http://localhost:8000/country-information/?country={country}"
+    url = f"{_host}/country-information/?country={country}"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
