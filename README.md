@@ -1,3 +1,5 @@
+https://movesmart.dschor.tech/recommendations
+
 # Cost of living and income Analysis Dashboard
 ---
 
